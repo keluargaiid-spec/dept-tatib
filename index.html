@@ -4,15 +4,21 @@
     <meta charset="UTF-8">
     <title>Menu Utama - Monitoring Kursi</title>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 50px; background: #f4f4f9; }
-        .btn { display: inline-block; padding: 15px 30px; margin: 10px; background: #2196F3; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; }
+        body { font-family: sans-serif; text-align: center; padding: 50px; background: #f4f4f9; color: #333; }
+        .card { background: white; max-width: 500px; margin: 0 auto; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn { display: inline-block; padding: 15px 25px; margin: 10px; background: #2196F3; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; transition: background 0.2s; }
         .btn-display { background: #4CAF50; }
+        .btn:hover { opacity: 0.9; }
     </style>
 </head>
 <body>
-    <h2>Sistem Monitoring Kursi Pertemuan</h2>
-    <p>Pilih halaman yang ingin dibuka:</p>
-    <a href="operator.html" class="btn">Buka Panel Tatib</a>
-    <a href="display.html" class="btn btn-display">Buka Layar Display HDMI</a>
+    <div class="card">
+        <h2>Sistem Monitoring Kursi Pertemuan</h2>
+        <p>Pilih halaman yang ingin dibuka (akan otomatis terbuka di jendela baru):</p>
+        
+        <!-- target="_blank" membuat tautan terbuka di jendela/tab baru -->
+        <a href="operator.html" target="_blank" rel="noopener noreferrer" class="btn">Buka Panel Tatib</a>
+        <a href="display.html" target="_blank" rel="noopener noreferrer" class="btn btn-display">Buka Layar Display HDMI</a>
+    </div>
 </body>
 </html>
