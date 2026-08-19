@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Monitoring Kursi Pertemuan - Display HDMI</title>
+    <style>
+        body { font-family: sans-serif; background: #121212; color: white; padding: 20px; margin: 0; }
+        h1 { text-align: center; margin-bottom: 15px; letter-spacing: 1px; }
+        
+        /* Style Tabel Rekapitulasi */
+        .table-container { width: 90%; max-width: 900px; margin: 0 auto 25px auto; }
+        .summary-table { width: 100%; border-collapse: collapse; background: #1e1e1e; border-radius: 8px; overflow: hidden; }
+        .summary-table th, .summary-table td { padding: 12px 15px; text-align: center; border-bottom: 1px solid #333; }
+        .summary-table th { background-color: #2c2c2c; color: #ffca28; font-size: 1.1rem; }
+        .summary-table td { font-size: 1rem; }
+        .summary-table tfoot tr { background-color: #252525; font-weight: bold; font-size: 1.1rem; }
+        .text-kosong { color: #81c784; font-weight: bold; } /* Hijau */
+        .text-terisi { color: #e57373; font-weight: bold; } /* Merah */
+
+        /* Denah Grid Kursi */
+        .block-container { display: flex; gap: 25px; justify-content: center; flex-wrap: wrap; }
+        .block-card { background: #1e1e1e; padding: 15px 20px; border-radius: 8px; border: 1px solid #333; min-width: 200px; }
+        .block-card h3 { margin-top: 0; border-bottom: 1px solid #444; padding-bottom: 8px; text-align: center; color: #ffca28; }
+        .grid { display: grid; gap: 8px; margin-top: 10px; }
+        .seat { height: 35px; display: flex; align-items: center; justify-content: center; border-radius: 4px; font-weight: bold; font-size: 0.75rem; padding: 0 5px; }
+        .vacant { background-color: #2e7d32; color: white; }
+        .occupied { background-color: #c62828; color: white; }
+    </style>
+</head>
+<body>
+
+    <h1>MONITORING KURSI PERTEMUAN</h1>
+
+    <!-- Container Tabel Rekapitulasi -->
+    <div class="table-container">
+        <table class="summary-table">
+            <thead>
+                <tr>
+                    <th>Blok</th>
+                    <th>Jumlah Kursi</th>
+                    <th>Kosong</th>
+                    <th>Terisi</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <tr><td colspan="4">Menunggu data dari petugas tatib...</td></tr>
+            </tbody>
+            <tfoot id="tableFoot"></tfoot>
+        </table>
+    </div>
+
+    <!-- Container Visual Grid Kursi -->
+    <div class="block-container" id="blocksWrapper"></div>
+
+    <script>
+        const channel = new BroadcastChannel('seminar_seat_channel');
+
+        function renderDisplay(data) {
+            const tbody = document.getElementById('tableBody');
+            const tfoot = document.getElementById('tableFoot');
+            const wrapper = document.getElementById('blocksWrapper');
+
+            tbody.innerHTML = '';
+            tfoot.innerHTML = '';
+            wrapper.innerHTML = '';
+
+            if (!data.blocks || data.blocks.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4">Belum ada blok ditambahkan</td></tr>';
+                return;
+            }
+
+            let grandTotalKursi = 0;
+            let grandTotalKosong = 0;
+            let grandTotalTerisi = 0;
+
+            // Render Baris Tabel & Card Grid Per Blok
+            data.blocks.forEach(block => {
+                const totalKursi = block.seats.length;
+                const terisi = block.seats.filter(s => s.occupied).length;
+                const kosong = totalKursi - terisi;
+
+                grandTotalKursi += totalKursi;
+                grandTotalKosong += kosong;
+                grandTotalTerisi += terisi;
+
+                // 1. Tambah baris ke tabel
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><b>Blok ${block.code}</b></td>
+                    <td>${totalKursi}</td>
+                    <td class="text-kosong">${kosong}</td>
+                    <td class="text-terisi">${terisi}</td>
+                `;
+                tbody.appendChild(tr);
+
+                // 2. Tambah Visual Card Grid
+                const card = document.createElement('div');
+                card.className = 'block-card';
+                card.innerHTML = `<h3>BLOK ${block.code}</h3>`;
+
+                const grid = document.createElement('div');
+                grid.className = 'grid';
+                grid.style.gridTemplateColumns = `repeat(${block.cols}, 1fr)`;
+
+                block.seats.forEach(seat => {
+                    const seatEl = document.createElement('div');
+                    seatEl.className = `seat ${seat.occupied ? 'occupied' : 'vacant'}`;
+                    seatEl.innerText = `R${seat.r}-C${seat.c}`;
+                    grid.appendChild(seatEl);
+                });
+
+                card.appendChild(grid);
+                wrapper.appendChild(card);
+            });
+
+            // 3. Tambah Baris Total
+            tfoot.innerHTML = `
+                <tr>
+                    <td>TOTAL</td>
+                    <td>${grandTotalKursi}</td>
+                    <td class="text-kosong">${grandTotalKosong}</td>
+                    <td class="text-terisi">${grandTotalTerisi}</td>
+                </tr>
+            `;
+        }
+
+        channel.onmessage = (event) => {
+            renderDisplay(event.data);
+        };
+    </script>
+</body>
+</html>
