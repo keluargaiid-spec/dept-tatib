@@ -52,9 +52,9 @@
     <div class="block-container" id="blocksWrapper"></div>
 
     <script>
-        // MASUKKAN URL REALTIME DATABASE FIREBASE ANDA DI SINI
+        // PASTA KAN URL FIREBASE ANDA DI SINI
         const firebaseConfig = {
-            databaseURL: "https://GANTI-DENGAN-URL-FIREBASE-ANDA.firebaseio.com"
+            databaseURL: "https://monitoring-tatib-default-rtdb.asia-southeast1.firebasedatabase.app"
         };
         
         firebase.initializeApp(firebaseConfig);
@@ -63,10 +63,13 @@
         // Menerima Update Data Otomatis dari Firebase
         db.on('value', (snapshot) => {
             const data = snapshot.val();
-            renderDisplay(data || { blocks: [] });
+            renderDisplay(data);
+        }, (error) => {
+            console.error("Gagal mengambil data:", error);
+            document.getElementById('tableBody').innerHTML = `<tr><td colspan="4" style="color:red">Error: ${error.message}</td></tr>`;
         });
 
-        function renderDisplay(data) {
+        function renderDisplay(rawData) {
             const tbody = document.getElementById('tableBody');
             const tfoot = document.getElementById('tableFoot');
             const wrapper = document.getElementById('blocksWrapper');
@@ -75,16 +78,28 @@
             tfoot.innerHTML = '';
             wrapper.innerHTML = '';
 
-            if (!data.blocks || data.blocks.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="4">Belum ada blok ditambahkan</td></tr>';
+            // Penanganan jika data masih kosong/null
+            if (!rawData || !rawData.blocks) {
+                tbody.innerHTML = '<tr><td colspan="4">Belum ada blok ditambahkan dari Panel Tatib.</td></tr>';
                 return;
             }
 
+            // Memastikan data berbentuk Array (mencegah error jika Firebase mengubah format ke Object)
+            const blocks = Array.isArray(rawData.blocks) 
+                ? rawData.blocks 
+                : Object.values(rawData.blocks);
+
             let grandTotalKursi = 0, grandTotalKosong = 0, grandTotalTerisi = 0;
 
-            data.blocks.forEach(block => {
-                const totalKursi = block.seats.length;
-                const terisi = block.seats.filter(s => s.occupied).length;
+            blocks.forEach(block => {
+                if (!block) return;
+
+                const seats = block.seats 
+                    ? (Array.isArray(block.seats) ? block.seats : Object.values(block.seats))
+                    : [];
+
+                const totalKursi = seats.length;
+                const terisi = seats.filter(s => s && s.occupied).length;
                 const kosong = totalKursi - terisi;
 
                 grandTotalKursi += totalKursi;
@@ -108,7 +123,8 @@
                 grid.className = 'grid';
                 grid.style.gridTemplateColumns = `repeat(${block.cols}, 1fr)`;
 
-                block.seats.forEach(seat => {
+                seats.forEach(seat => {
+                    if (!seat) return;
                     const seatEl = document.createElement('div');
                     seatEl.className = `seat ${seat.occupied ? 'occupied' : 'vacant'}`;
                     seatEl.innerText = `R${seat.r}-C${seat.c}`;
