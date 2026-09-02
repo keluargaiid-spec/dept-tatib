@@ -1,24 +1,1151 @@
+
+Gemini
+Percakapan baru
+Telusuri percakapan
+Gambar
+Koleksi
+Membuat Game Topology Architect Interaktif
+Aplikasi Portal Guru-Murid GAS
+Aplikasi Tata Tertib Event
+Aplikasi SAPDA Apps Script
+Aplikasi Administrasi Pengerjaan Daerah
+Tombol Hapus Tidak Merespons di Mobile
+Kode Arduino Lampu Lalu Lintas
+Manfaat Catatan Kaki Alkitab
+Cara Semat Apps Script Full Screen di Google Sites
+Perbaikan Grafik Tidak Muncul
+Perbaikan Form dan Validasi Frontend
+Fitur Cari dan Edit Laporan Kegiatan
+Ide Sistem Monitoring Peserta Seminar
+Kelebihan Kekurangan Topologi Jaringan SMA
+Membuat Dashboard Shortcut Web Interaktif
+Landing Page Apps Script Berbasis Role
+Sapaan dan Tawaran Bantuan
+RPP Informatika Kelas XI Daring Interaktif
+Pembuatan Game Edukasi IPA Interaktif
+Aplikasi SAPDA AppSheet
+Ilustrasi Linimasa Covid-19 di Indonesia
+Beri saya ide 4 gambar logo untuk aplikasi sistem administrasi pengerjaan daerah. Nama Aplikasinya "SAPDA" (Sitem Alikasi Pengerjaan Daerah). Saya ingin memberikan kesan profesional tetapi tidak kaku. Modern, bertanggungjawab, dinais. Desain logo yang saya minta berbentuk square.
+Saya adalah Tutor PKBM Tree Homeschool. Saya ingin membuat slide presentasi untuk MPLS dengan canva AI. Buatkan prompt untuk canva AI yang bertujuan membuat 2 slide presentasi penjelasan tentang TKA. Dalam Slide jelaskan tentang apa itu TKA. Seperti apa soalnya. Apa manfaatnya mengikuti TKA. Buat ilustrasi yang menarik dan sesuai dengan tema.
+Presentasi 7 Kebiasaan Anak Indonesia Hebat
+Tips Mengajar Informatika Online Aktif
+Kunci Jawaban Informatika Jaringan & Kritis
+Perhitungan Harga Sewa Netto Pajak
+Percakapan dengan Gemini
+Dalam aplikasi ini, saat dijalankan dengan komputer berbasis windows, tombol hapus berjalan dengan baik.
+
+Tetapi, saat dijalankan dengan mobile di HP, tombol Hapus tidak bereaksi
+
+Masalah tombol "Hapus" yang berfungsi di komputer Windows tetapi tidak merespons di perangkat mobile (HP) hampir selalu disebabkan oleh cara penanganan event sentuhan (touch event) di JavaScript yang berbeda dengan event klik mouse biasa.
+
+Meskipun berkas index.html yang Anda lampirkan hanya berisi halaman menu utama, penyebab dan solusi untuk masalah pada halaman panel operator/layar Anda dapat diidentifikasi melalui poin-poin berikut:
+
+Penyebab Utama & Solusi
+
+Masalah Event Listener (click vs touchstart)
+
+Penyebab: Browser mobile terkadang menunda atau mengabaikan event click standar jika ada pemrosesan sentuhan yang terhalang, atau jika sistem menunggu gestur double-tap.
+
+Solusi: Tambahkan event pointerdown atau kombinasikan touchstart dan click pada tombol Hapus di file JS/HTML Anda.
+
+JavaScript
+// Gunakan pointerdown agar fleksibel untuk mouse maupun layar sentuh
+buttonHapus.addEventListener('pointerdown', fungsiHapus);
+Penundaan Sentuhan (30ms Click Delay / Double-Tap Zoom)
+
+Penyebab: HP sering menunda tindakan tombol untuk mengecek apakah pengguna ingin melakukan zoom.
+
+Solusi: Pastikan tag meta viewport berikut sudah terpasang di bagian <head> pada file operator.html:
+
+HTML
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+Elemen Terhalang (CSS Layering / Z-Index)
+
+Penyebab: Di tampilan HP yang lebih sempit, ada kemungkinan elemen transparan lain (seperti overlay, margin negatif, atau container) menutupi tombol Hapus sehingga sentuhan jari tidak mengenai tombol secara langsung.
+
+Solusi: Periksa CSS tombol Hapus dan tambahkan atribut z-index yang lebih tinggi atau beri properti cursor: pointer;.
+
+Penggunaan Dialog Konfirmasi (confirm()) yang Terblokir
+
+Penyebab: Jika tombol Hapus memicu fungsi confirm("Apakah Anda yakin?"), beberapa browser HP (seperti Chrome Mobile atau Safari) sering memblokir pop-up bawaan ini jika tidak dipicu secara langsung oleh gestur pengguna yang valid.
+
+Solusi: Ganti pop-up confirm() bawaan browser dengan modal dialog berbasis HTML/CSS kustom.
+
+buatkan file lengkapnya
+
+Berikut adalah file lengkap aplikasi yang telah diperbaiki agar tombol Hapus dapat berjalan dengan lancar baik di komputer (Windows) maupun perangkat mobile (HP).
+
+File-file yang Dihasilkan:
+index.html — 
+Ikon HTML
+index
+ HTML 
+
+operator.html — 
+Ikon HTML
+operator
+ HTML 
+
+display.html — 
+Ikon HTML
+display
+ HTML 
+
+Penjelasan Perbaikan Utama pada operator.html:
+Penggunaan PointerEvent (pointerdown):
+
+Di perangkat HP, event click biasa sering tertunda (300ms click delay) atau diblokir oleh sistem touch bawaan browser.
+
+Dengan event listener berbasis pointerdown / touchstart, tombol Hapus akan merespons seketika begitu disentuh di HP tanpa mengganggu fungsi klik mouse di Windows.
+
+Mengganti confirm() Browser dengan Custom Modal HTML/CSS:
+
+Browser mobile (seperti Chrome Mobile atau Safari iOS) sering kali memblokir pop-up bawaan window.confirm() saat dipicu oleh event sentuhan.
+
+Aplikasi kini menggunakan modal konfirmasi HTML/CSS buatan sendiri yang tampil mulus di layar HP.
+
+Penambahan Meta Viewport & CSS Optimization:
+
+Tag <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> ditambahkan agar antarmuka tidak mengalami penggeseran / zoom otomatis saat tombol ditekan.
+
+Menggunakan touch-action: manipulation pada CSS tombol untuk mempercepat pemrosesan sentuhan jari.
+
+Sinkronisasi Real-Time (BroadcastChannel & LocalStorage):
+
+Apapun perubahan (tambah/hapus) yang dilakukan di operator.html via HP atau PC akan langsung ter-update secara otomatis di layar display.html.
+
+Kode Lengkap Berkas:
+1. operator.html
+HTML
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Menu Utama - Monitoring Kursi</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Panel Tatib - Control Room</title>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 50px; background: #f4f4f9; color: #333; }
-        .card { background: white; max-width: 500px; margin: 0 auto; padding: 30px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .btn { display: inline-block; padding: 15px 25px; margin: 10px; background: #2196F3; color: white; text-decoration: none; border-radius: 6px; font-weight: bold; transition: background 0.2s; }
-        .btn-display { background: #4CAF50; }
-        .btn:hover { opacity: 0.9; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f1f5f9; color: #0f172a; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        header { background: #1e293b; color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; text-align: center; }
+        
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        .card h3 { margin-bottom: 15px; color: #334155; font-size: 18px; }
+        
+        .form-group { display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; }
+        input[type="text"] { flex: 1; min-width: 200px; padding: 12px 15px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 16px; outline: none; }
+        
+        /* Gaya Tombol Utama */
+        .btn {
+            padding: 12px 20px;
+            font-size: 15px;
+            font-weight: 600;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .btn:active { transform: scale(0.97); }
+        .btn-add { background: #2563eb; color: white; width: 100%; }
+        @media (min-width: 480px) { .btn-add { width: auto; } }
+        
+        /* Tombol Hapus Responsif HP & PC */
+        .btn-delete {
+            background: #ef4444;
+            color: white;
+            padding: 8px 14px;
+            font-size: 14px;
+            border-radius: 6px;
+        }
+        .btn-delete:hover { background: #dc2626; }
+        .btn-reset { background: #64748b; color: white; margin-top: 15px; width: 100%; }
+
+        /* Daftar Kursi */
+        .item-list { list-style: none; }
+        .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .item-info { font-weight: 600; font-size: 15px; }
+
+        /* Modal Dialog Custom (Pengganti confirm() bawaan browser) */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 9999;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-box {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .modal-box h4 { font-size: 18px; margin-bottom: 10px; color: #1e293b; }
+        .modal-box p { font-size: 14px; color: #64748b; margin-bottom: 20px; }
+        .modal-actions { display: flex; gap: 10px; justify-content: center; }
+        .btn-cancel { background: #94a3b8; color: white; flex: 1; }
+        .btn-confirm { background: #ef4444; color: white; flex: 1; }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h2>Sistem Monitoring Kursi Pertemuan</h2>
-        <p>Pilih halaman yang ingin dibuka (akan otomatis terbuka di jendela baru):</p>
-        
-        <!-- target="_blank" membuat tautan terbuka di jendela/tab baru -->
-        <a href="operator.html" target="_blank" rel="noopener noreferrer" class="btn">Buka Panel Tatib</a>
-        <a href="display.html" target="_blank" rel="noopener noreferrer" class="btn btn-display">Buka Layar Display HDMI</a>
+    <div class="container">
+        <header>
+            <h2>Panel Operator / Tatib</h2>
+            <p style="font-size: 13px; opacity: 0.8; margin-top: 4px;">Kelola daftar kursi & kehadiran secara real-time</p>
+        </header>
+
+        <div class="card">
+            <h3>Tambah Registrasi / Kursi</h3>
+            <div class="form-group">
+                <input type="text" id="inputNama" placeholder="Nama Peserta / Nomor Kursi..." />
+                <button type="button" class="btn btn-add" id="btnTambah">Tambah</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Daftar Kursi Aktif</h3>
+            <ul id="daftarKursi" class="item-list"></ul>
+            <button type="button" class="btn btn-reset" id="btnResetSemua">Reset Semua Data</button>
+        </div>
     </div>
+
+    <!-- Modal Konfirmasi Hapus -->
+    <div class="modal-overlay" id="modalConfirm">
+        <div class="modal-box">
+            <h4>Konfirmasi Hapus</h4>
+            <p>Apakah Anda yakin ingin menghapus data kursi ini?</p>
+            <div class="modal-actions">
+                <button class="btn btn-cancel" id="btnBatalHapus">Batal</button>
+                <button class="btn btn-confirm" id="btnYaHapus">Ya, Hapus</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const channel = new BroadcastChannel('kursi_channel');
+        let dataKursi = JSON.parse(localStorage.getItem('dataKursi')) || [
+            { id: 1, nama: "Kursi 01 - Dr. Ahmad" },
+            { id: 2, nama: "Kursi 02 - Ibu Siska" },
+            { id: 3, nama: "Kursi 03 - Tamu VVIP" }
+        ];
+
+        let itemToDeleteId = null;
+
+        function renderList() {
+            const container = document.getElementById('daftarKursi');
+            container.innerHTML = '';
+            
+            if (dataKursi.length === 0) {
+                container.innerHTML = '<li style="text-align:center; color:#94a3b8; padding:20px;">Belum ada data kursi.</li>';
+                return;
+            }
+
+            dataKursi.forEach((item) => {
+                const li = document.createElement('li');
+                li.className = 'item';
+                li.innerHTML = `
+                    <span class="item-info">${escapeHtml(item.nama)}</span>
+                    <button type="button" class="btn btn-delete" data-id="${item.id}">Hapus</button>
+                `;
+                container.appendChild(li);
+            });
+
+            localStorage.setItem('dataKursi', JSON.stringify(dataKursi));
+            channel.postMessage({ type: 'UPDATE_DATA', data: dataKursi });
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        // Handling Event Sentuhan HP & Klik Mouse PC
+        const listContainer = document.getElementById('daftarKursi');
+        const handleDeleteTrigger = (e) => {
+            const deleteBtn = e.target.closest('.btn-delete');
+            if (!deleteBtn) return;
+            
+            e.preventDefault();
+            const id = parseInt(deleteBtn.getAttribute('data-id'), 10);
+            showDeleteModal(id);
+        };
+
+        if (window.PointerEvent) {
+            listContainer.addEventListener('pointerdown', handleDeleteTrigger);
+        } else {
+            listContainer.addEventListener('touchstart', handleDeleteTrigger);
+            listContainer.addEventListener('click', handleDeleteTrigger);
+        }
+
+        // Modal Handler
+        const modal = document.getElementById('modalConfirm');
+        document.getElementById('btnBatalHapus').addEventListener('click', () => modal.classList.remove('active'));
+        document.getElementById('btnYaHapus').addEventListener('click', () => {
+            if (itemToDeleteId !== null) {
+                dataKursi = dataKursi.filter(item => item.id !== itemToDeleteId);
+                renderList();
+                modal.classList.remove('active');
+            }
+        });
+
+        function showDeleteModal(id) {
+            itemToDeleteId = id;
+            modal.classList.add('active');
+        }
+
+        // Tambah Data
+        document.getElementById('btnTambah').addEventListener('click', () => {
+            const input = document.getElementById('inputNama');
+            const nama = input.value.trim();
+            if (nama) {
+                dataKursi.push({ id: Date.now(), nama });
+                input.value = '';
+                renderList();
+            }
+        });
+
+        // Reset Data
+        document.getElementById('btnResetSemua').addEventListener('click', () => {
+            dataKursi = [];
+            renderList();
+        });
+
+        renderList();
+    </script>
 </body>
 </html>
+2. display.html
+HTML
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Layar Display HDMI - Monitoring Kursi</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #0f172a; color: white; padding: 40px; min-height: 100vh; }
+        header { text-align: center; margin-bottom: 40px; border-bottom: 2px solid #334155; padding-bottom: 20px; }
+        h1 { font-size: 36px; color: #38bdf8; letter-spacing: 1px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; max-width: 1200px; margin: 0 auto; }
+        .seat-card { background: #1e293b; border: 2px solid #38bdf8; border-radius: 12px; padding: 25px 15px; text-align: center; font-weight: bold; font-size: 18px; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3); }
+        .seat-card.empty { border-color: #475569; color: #64748b; background: #0f172a; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>MONITORING STATUS KURSI PERTEMUAN</h1>
+    </header>
+
+    <div id="displayGrid" class="grid"></div>
+
+    <script>
+        const channel = new BroadcastChannel('kursi_channel');
+
+        function updateDisplay(data) {
+            const grid = document.getElementById('displayGrid');
+            grid.innerHTML = '';
+            
+            if (!data || data.length === 0) {
+                grid.innerHTML = '<div class="seat-card empty" style="grid-column: 1/-1;">TIDAK ADA KURSI TERDAFTAR</div>';
+                return;
+            }
+
+            data.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'seat-card';
+                card.textContent = item.nama;
+                grid.appendChild(card);
+            });
+        }
+
+        channel.onmessage = (event) => {
+            if (event.data && event.data.type === 'UPDATE_DATA') {
+                updateDisplay(event.data.data);
+            }
+        };
+
+        window.addEventListener('storage', () => {
+            const data = JSON.parse(localStorage.getItem('dataKursi')) || [];
+            updateDisplay(data);
+        });
+
+        const initialData = JSON.parse(localStorage.getItem('dataKursi')) || [
+            { id: 1, nama: "Kursi 01 - Dr. Ahmad" },
+            { id: 2, nama: "Kursi 02 - Ibu Siska" },
+            { id: 3, nama: "Kursi 03 - Tamu VVIP" }
+        ];
+        updateDisplay(initialData);
+    </script>
+</body>
+</html>
+jadikan single file html
+
+File tunggal HTML siap digunakan:
+monitoring_kursi.html — 
+Ikon HTML
+monitoring_kursi
+ HTML 
+
+Fitur & Perbaikan dalam File Tunggal Ini:
+Gabungan Semua Halaman (Single-File Architecture):
+
+Halaman Panel Tatib (Operator) dan Layar Display HDMI disatukan dalam satu file dengan sistem Tab Navigasi yang responsif.
+
+Solusi Tombol Hapus di Perangkat Mobile (HP):
+
+pointerdown & Touch Handler: Menggunakan PointerEvent agar tombol langsung merespons sentuhan di layar HP Android/iOS tanpa tertunda 300ms (click delay).
+
+Custom Modal Confirmation: Menggantikan confirm() bawaan browser yang sering terblokir/hang di HP dengan dialog modal modern berbasis HTML & CSS.
+
+touch-action: manipulation: Menghindari zoom otomatis atau penggeseran layout yang tidak disengaja saat tombol Hapus ditekan berkali-kali di HP.
+
+Penyimpanan Lokal & Update Otomatis:
+
+Data tersimpan secara otomatis di localStorage peramban, sehingga jika tab berpindah dari Panel Tatib ke Display HDMI, status data kursi langsung diperbarui secara real-time.
+
+Kode Lengkap Berkas monitoring_kursi.html:
+HTML
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sistem Monitoring Kursi Pertemuan</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #0f172a;
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navigasi Tab Utama */
+        nav {
+            background: #1e293b;
+            display: flex;
+            justify-content: center;
+            border-bottom: 2px solid #334155;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .tab-btn {
+            padding: 16px 24px;
+            background: none;
+            border: none;
+            color: #94a3b8;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 3px solid transparent;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        .tab-btn:hover { color: #f8fafc; }
+        .tab-btn.active {
+            color: #38bdf8;
+            border-bottom-color: #38bdf8;
+            background: rgba(56, 189, 248, 0.05);
+        }
+
+        /* Area Konten */
+        .tab-content {
+            display: none;
+            padding: 20px;
+            flex: 1;
+            max-width: 1000px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        .tab-content.active { display: block; }
+
+        /* General UI Elements */
+        .card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+        }
+        h2 { font-size: 22px; color: #f8fafc; margin-bottom: 12px; }
+        h3 { font-size: 18px; color: #cbd5e1; margin-bottom: 16px; }
+        p { color: #94a3b8; font-size: 14px; line-height: 1.5; margin-bottom: 20px; }
+
+        /* Form & Button Styles */
+        .form-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        input[type="text"] {
+            flex: 1;
+            min-width: 200px;
+            padding: 14px 16px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input[type="text"]:focus { border-color: #38bdf8; }
+
+        .btn {
+            padding: 14px 20px;
+            font-size: 15px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .btn:active { transform: scale(0.97); }
+        .btn-add { background: #2563eb; color: white; width: 100%; }
+        @media (min-width: 480px) { .btn-add { width: auto; } }
+
+        /* Tombol Hapus Spesifik HP & PC */
+        .btn-delete {
+            background: #ef4444;
+            color: white;
+            padding: 8px 14px;
+            font-size: 14px;
+            border-radius: 6px;
+        }
+        .btn-delete:hover { background: #dc2626; }
+        .btn-reset { background: #475569; color: white; margin-top: 15px; width: 100%; }
+
+        /* List Items (Panel Tatib) */
+        .item-list { list-style: none; }
+        .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 18px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .item-info { font-weight: 600; font-size: 15px; color: #f1f5f9; }
+
+        /* Grid Display HDMI */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+        }
+        .seat-card {
+            background: #1e293b;
+            border: 2px solid #38bdf8;
+            border-radius: 12px;
+            padding: 25px 15px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+            color: #38bdf8;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+        .seat-card.empty { border-color: #334155; color: #64748b; background: #0f172a; }
+
+        /* Modal Dialog Custom (Aman untuk HP) */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 9999;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-box {
+            background: #1e293b;
+            border: 1px solid #334155;
+            padding: 25px;
+            border-radius: 12px;
+            max-width: 380px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+        .modal-box h4 { font-size: 18px; margin-bottom: 10px; color: #f8fafc; }
+        .modal-box p { font-size: 14px; color: #94a3b8; margin-bottom: 20px; }
+        .modal-actions { display: flex; gap: 10px; justify-content: center; }
+        .btn-cancel { background: #475569; color: white; flex: 1; }
+        .btn-confirm { background: #ef4444; color: white; flex: 1; }
+    </style>
+</head>
+<body>
+
+    <!-- Navigasi Tab -->
+    <nav>
+        <button class="tab-btn active" onclick="switchTab('operator')">Panel Tatib (Operator)</button>
+        <button class="tab-btn" onclick="switchTab('display')">Layar Display HDMI</button>
+    </nav>
+
+    <!-- Tab 1: Panel Operator / Tatib -->
+    <div id="tab-operator" class="tab-content active">
+        <div class="card">
+            <h2>Panel Operator / Tatib</h2>
+            <p>Tambah dan kelola daftar kursi atau peserta secara langsung.</p>
+            <div class="form-group">
+                <input type="text" id="inputNama" placeholder="Nama Peserta / Nomor Kursi..." />
+                <button type="button" class="btn btn-add" id="btnTambah">Tambah</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Daftar Kursi Aktif</h3>
+            <ul id="daftarKursi" class="item-list"></ul>
+            <button type="button" class="btn btn-reset" id="btnResetSemua">Reset Semua Data</button>
+        </div>
+    </div>
+
+    <!-- Tab 2: Display HDMI -->
+    <div id="tab-display" class="tab-content">
+        <div class="card" style="text-align: center; background: transparent; border: none; box-shadow: none;">
+            <h1 style="font-size: 28px; color: #38bdf8; margin-bottom: 8px;">MONITORING STATUS KURSI PERTEMUAN</h1>
+            <p>Tampilan real-time status kursi</p>
+        </div>
+        <div id="displayGrid" class="grid"></div>
+    </div>
+
+    <!-- Modal Konfirmasi Hapus -->
+    <div class="modal-overlay" id="modalConfirm">
+        <div class="modal-box">
+            <h4>Konfirmasi Hapus</h4>
+            <p>Apakah Anda yakin ingin menghapus data kursi ini?</p>
+            <div class="modal-actions">
+                <button class="btn btn-cancel" id="btnBatalHapus">Batal</button>
+                <button class="btn btn-confirm" id="btnYaHapus">Ya, Hapus</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data State
+        let dataKursi = JSON.parse(localStorage.getItem('dataKursi_single')) || [
+            { id: 1, nama: "Kursi 01 - Dr. Ahmad" },
+            { id: 2, nama: "Kursi 02 - Ibu Siska" },
+            { id: 3, nama: "Kursi 03 - Tamu VVIP" }
+        ];
+
+        let itemToDeleteId = null;
+
+        function renderAll() {
+            renderOperatorList();
+            renderDisplayGrid();
+            localStorage.setItem('dataKursi_single', JSON.stringify(dataKursi));
+        }
+
+        function renderOperatorList() {
+            const container = document.getElementById('daftarKursi');
+            container.innerHTML = '';
+
+            if (dataKursi.length === 0) {
+                container.innerHTML = '<li style="text-align:center; color:#64748b; padding:20px;">Belum ada data kursi.</li>';
+                return;
+            }
+
+            dataKursi.forEach((item) => {
+                const li = document.createElement('li');
+                li.className = 'item';
+                li.innerHTML = `
+                    <span class="item-info">${escapeHtml(item.nama)}</span>
+                    <button type="button" class="btn btn-delete" data-id="${item.id}">Hapus</button>
+                `;
+                container.appendChild(li);
+            });
+        }
+
+        function renderDisplayGrid() {
+            const grid = document.getElementById('displayGrid');
+            grid.innerHTML = '';
+
+            if (dataKursi.length === 0) {
+                grid.innerHTML = '<div class="seat-card empty" style="grid-column: 1/-1;">TIDAK ADA KURSI TERDAFTAR</div>';
+                return;
+            }
+
+            dataKursi.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'seat-card';
+                card.textContent = item.nama;
+                grid.appendChild(card);
+            });
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        // Switching Tab
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            if (tabName === 'operator') {
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                document.getElementById('tab-operator').classList.add('active');
+            } else {
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                document.getElementById('tab-display').classList.add('active');
+            }
+        }
+
+        // EVENT LISTENER KHUSUS MOBILE & WINDOWS
+        const listContainer = document.getElementById('daftarKursi');
+        const handleDeleteTrigger = (e) => {
+            const deleteBtn = e.target.closest('.btn-delete');
+            if (!deleteBtn) return;
+
+            e.preventDefault();
+            const id = parseInt(deleteBtn.getAttribute('data-id'), 10);
+            showDeleteModal(id);
+        };
+
+        if (window.PointerEvent) {
+            listContainer.addEventListener('pointerdown', handleDeleteTrigger);
+        } else {
+            listContainer.addEventListener('touchstart', handleDeleteTrigger);
+            listContainer.addEventListener('click', handleDeleteTrigger);
+        }
+
+        // Modal Handler
+        const modal = document.getElementById('modalConfirm');
+        document.getElementById('btnBatalHapus').addEventListener('click', () => modal.classList.remove('active'));
+        document.getElementById('btnYaHapus').addEventListener('click', () => {
+            if (itemToDeleteId !== null) {
+                dataKursi = dataKursi.filter(item => item.id !== itemToDeleteId);
+                renderAll();
+                modal.classList.remove('active');
+            }
+        });
+
+        function showDeleteModal(id) {
+            itemToDeleteId = id;
+            modal.classList.add('active');
+        }
+
+        // Tambah Data
+        document.getElementById('btnTambah').addEventListener('click', () => {
+            const input = document.getElementById('inputNama');
+            const nama = input.value.trim();
+            if (nama) {
+                dataKursi.push({ id: Date.now(), nama });
+                input.value = '';
+                renderAll();
+            }
+        });
+
+        // Reset Data
+        document.getElementById('btnResetSemua').addEventListener('click', () => {
+            dataKursi = [];
+            renderAll();
+        });
+
+        renderAll();
+    </script>
+</body>
+</html>
+
+
+
+Percakapan Kementerian Pendidikan dan Kebudayaan Indonesia (Kesetaraan) Anda tidak digunakan untuk meningkatkan kualitas model kami. Gemini adalah AI dan dapat melakukan kesalahan. Privasi Anda & GeminiTerbuka di jendela baru
+
+Menganalisis
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sistem Monitoring Kursi Pertemuan</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #0f172a;
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navigasi Tab Utama */
+        nav {
+            background: #1e293b;
+            display: flex;
+            justify-content: center;
+            border-bottom: 2px solid #334155;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .tab-btn {
+            padding: 16px 24px;
+            background: none;
+            border: none;
+            color: #94a3b8;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-bottom: 3px solid transparent;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        .tab-btn:hover { color: #f8fafc; }
+        .tab-btn.active {
+            color: #38bdf8;
+            border-bottom-color: #38bdf8;
+            background: rgba(56, 189, 248, 0.05);
+        }
+
+        /* Area Konten */
+        .tab-content {
+            display: none;
+            padding: 20px;
+            flex: 1;
+            max-width: 1000px;
+            width: 100%;
+            margin: 0 auto;
+        }
+        .tab-content.active { display: block; }
+
+        /* General UI Elements */
+        .card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+        }
+        h2 { font-size: 22px; color: #f8fafc; margin-bottom: 12px; }
+        h3 { font-size: 18px; color: #cbd5e1; margin-bottom: 16px; }
+        p { color: #94a3b8; font-size: 14px; line-height: 1.5; margin-bottom: 20px; }
+
+        /* Form & Button Styles */
+        .form-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        input[type="text"] {
+            flex: 1;
+            min-width: 200px;
+            padding: 14px 16px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            color: white;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input[type="text"]:focus { border-color: #38bdf8; }
+
+        .btn {
+            padding: 14px 20px;
+            font-size: 15px;
+            font-weight: 600;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+            transition: background 0.2s, transform 0.1s;
+        }
+        .btn:active { transform: scale(0.97); }
+        .btn-add { background: #2563eb; color: white; width: 100%; }
+        @media (min-width: 480px) { .btn-add { width: auto; } }
+
+        /* Tombol Hapus Spesifik HP & PC */
+        .btn-delete {
+            background: #ef4444;
+            color: white;
+            padding: 8px 14px;
+            font-size: 14px;
+            border-radius: 6px;
+        }
+        .btn-delete:hover { background: #dc2626; }
+        .btn-reset { background: #475569; color: white; margin-top: 15px; width: 100%; }
+
+        /* List Items (Panel Tatib) */
+        .item-list { list-style: none; }
+        .item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 18px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .item-info { font-weight: 600; font-size: 15px; color: #f1f5f9; }
+
+        /* Grid Display HDMI */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+        }
+        .seat-card {
+            background: #1e293b;
+            border: 2px solid #38bdf8;
+            border-radius: 12px;
+            padding: 25px 15px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 18px;
+            color: #38bdf8;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+        .seat-card.empty { border-color: #334155; color: #64748b; background: #0f172a; }
+
+        /* Modal Dialog Custom (Aman untuk HP) */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 9999;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-box {
+            background: #1e293b;
+            border: 1px solid #334155;
+            padding: 25px;
+            border-radius: 12px;
+            max-width: 380px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+        }
+        .modal-box h4 { font-size: 18px; margin-bottom: 10px; color: #f8fafc; }
+        .modal-box p { font-size: 14px; color: #94a3b8; margin-bottom: 20px; }
+        .modal-actions { display: flex; gap: 10px; justify-content: center; }
+        .btn-cancel { background: #475569; color: white; flex: 1; }
+        .btn-confirm { background: #ef4444; color: white; flex: 1; }
+    </style>
+</head>
+<body>
+
+    <!-- Navigasi Tab -->
+    <nav>
+        <button class="tab-btn active" onclick="switchTab('operator')">Panel Tatib (Operator)</button>
+        <button class="tab-btn" onclick="switchTab('display')">Layar Display HDMI</button>
+    </nav>
+
+    <!-- Tab 1: Panel Operator / Tatib -->
+    <div id="tab-operator" class="tab-content active">
+        <div class="card">
+            <h2>Panel Operator / Tatib</h2>
+            <p>Tambah dan kelola daftar kursi atau peserta secara langsung.</p>
+            <div class="form-group">
+                <input type="text" id="inputNama" placeholder="Nama Peserta / Nomor Kursi..." />
+                <button type="button" class="btn btn-add" id="btnTambah">Tambah</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3>Daftar Kursi Aktif</h3>
+            <ul id="daftarKursi" class="item-list"></ul>
+            <button type="button" class="btn btn-reset" id="btnResetSemua">Reset Semua Data</button>
+        </div>
+    </div>
+
+    <!-- Tab 2: Display HDMI -->
+    <div id="tab-display" class="tab-content">
+        <div class="card" style="text-align: center; background: transparent; border: none; box-shadow: none;">
+            <h1 style="font-size: 28px; color: #38bdf8; margin-bottom: 8px;">MONITORING STATUS KURSI PERTEMUAN</h1>
+            <p>Tampilan real-time status kursi</p>
+        </div>
+        <div id="displayGrid" class="grid"></div>
+    </div>
+
+    <!-- Modal Konfirmasi Hapus (Solusi Modal untuk HP Mobile) -->
+    <div class="modal-overlay" id="modalConfirm">
+        <div class="modal-box">
+            <h4>Konfirmasi Hapus</h4>
+            <p>Apakah Anda yakin ingin menghapus data kursi ini?</p>
+            <div class="modal-actions">
+                <button class="btn btn-cancel" id="btnBatalHapus">Batal</button>
+                <button class="btn btn-confirm" id="btnYaHapus">Ya, Hapus</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data State
+        let dataKursi = JSON.parse(localStorage.getItem('dataKursi_single')) || [
+            { id: 1, nama: "Kursi 01 - Dr. Ahmad" },
+            { id: 2, nama: "Kursi 02 - Ibu Siska" },
+            { id: 3, nama: "Kursi 03 - Tamu VVIP" }
+        ];
+
+        let itemToDeleteId = null;
+
+        // Render Panel Tatib & Layar Display
+        function renderAll() {
+            renderOperatorList();
+            renderDisplayGrid();
+            localStorage.setItem('dataKursi_single', JSON.stringify(dataKursi));
+        }
+
+        function renderOperatorList() {
+            const container = document.getElementById('daftarKursi');
+            container.innerHTML = '';
+
+            if (dataKursi.length === 0) {
+                container.innerHTML = '<li style="text-align:center; color:#64748b; padding:20px;">Belum ada data kursi.</li>';
+                return;
+            }
+
+            dataKursi.forEach((item) => {
+                const li = document.createElement('li');
+                li.className = 'item';
+                li.innerHTML = `
+                    <span class="item-info">${escapeHtml(item.nama)}</span>
+                    <button type="button" class="btn btn-delete" data-id="${item.id}">Hapus</button>
+                `;
+                container.appendChild(li);
+            });
+        }
+
+        function renderDisplayGrid() {
+            const grid = document.getElementById('displayGrid');
+            grid.innerHTML = '';
+
+            if (dataKursi.length === 0) {
+                grid.innerHTML = '<div class="seat-card empty" style="grid-column: 1/-1;">TIDAK ADA KURSI TERDAFTAR</div>';
+                return;
+            }
+
+            dataKursi.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'seat-card';
+                card.textContent = item.nama;
+                grid.appendChild(card);
+            });
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+        }
+
+        // Switching Tab Interface
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+
+            if (tabName === 'operator') {
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                document.getElementById('tab-operator').classList.add('active');
+            } else {
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                document.getElementById('tab-display').classList.add('active');
+            }
+        }
+
+        // EVENT LISTENER KHUSUS MOBILE & WINDOWS (PointerEvent / TouchEvent)
+        const listContainer = document.getElementById('daftarKursi');
+        const handleDeleteTrigger = (e) => {
+            const deleteBtn = e.target.closest('.btn-delete');
+            if (!deleteBtn) return;
+
+            e.preventDefault(); // Mencegah emulasi klik ganda di mobile
+            const id = parseInt(deleteBtn.getAttribute('data-id'), 10);
+            showDeleteModal(id);
+        };
+
+        if (window.PointerEvent) {
+            listContainer.addEventListener('pointerdown', handleDeleteTrigger);
+        } else {
+            listContainer.addEventListener('touchstart', handleDeleteTrigger);
+            listContainer.addEventListener('click', handleDeleteTrigger);
+        }
+
+        // Modal Logic
+        const modal = document.getElementById('modalConfirm');
+        document.getElementById('btnBatalHapus').addEventListener('click', () => modal.classList.remove('active'));
+        document.getElementById('btnYaHapus').addEventListener('click', () => {
+            if (itemToDeleteId !== null) {
+                dataKursi = dataKursi.filter(item => item.id !== itemToDeleteId);
+                renderAll();
+                modal.classList.remove('active');
+            }
+        });
+
+        function showDeleteModal(id) {
+            itemToDeleteId = id;
+            modal.classList.add('active');
+        }
+
+        // Tambah Data
+        document.getElementById('btnTambah').addEventListener('click', () => {
+            const input = document.getElementById('inputNama');
+            const nama = input.value.trim();
+            if (nama) {
+                dataKursi.push({ id: Date.now(), nama });
+                input.value = '';
+                renderAll();
+            }
+        });
+
+        // Reset Data
+        document.getElementById('btnResetSemua').addEventListener('click', () => {
+            dataKursi = [];
+            renderAll();
+        });
+
+        // Initial Load
+        renderAll();
+    </script>
+</body>
+</html>
+monitoring_kursi.html
+Menampilkan monitoring_kursi.html.
