@@ -2,7 +2,8 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Tambahan maximum-scale dan user-scalable=no untuk mencegah zoom tidak sengaja di HP -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Panel Tatib - Monitoring Kursi</title>
     <!-- Firebase SDK Compat -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
@@ -11,6 +12,10 @@
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 15px; background: #f4f4f9; color: #333; margin: 0; }
         h2 { margin-top: 0; font-size: 1.3rem; }
+        
+        /* Tambahan CSS agar interaksi sentuh di HP responsif dan tidak ada delay */
+        button, input { touch-action: manipulation; }
+
         .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
         
         .form-group { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
@@ -41,6 +46,24 @@
         .seat-btn { height: 38px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75rem; }
         .vacant { background-color: #4CAF50; color: white; }
         .occupied { background-color: #f44336; color: white; }
+
+        /* ======== CSS UNTUK MODAL KONFIRMASI CUSTOM ======== */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center;
+            opacity: 0; pointer-events: none; transition: opacity 0.2s ease; z-index: 9999;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-box {
+            background: white; padding: 20px; border-radius: 8px; max-width: 320px; width: 90%; text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        .modal-box h4 { margin-top: 0; color: #333; font-size: 1.1rem; }
+        .modal-box p { color: #555; font-size: 0.9rem; margin-bottom: 20px; }
+        .modal-actions { display: flex; gap: 10px; justify-content: center; }
+        .modal-actions button { padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; color: white; width: 100%;}
+        .btn-modal-cancel { background: #9e9e9e; }
+        .btn-modal-confirm { background: #e53935; }
     </style>
 </head>
 <body>
@@ -89,6 +112,18 @@
     <!-- Container Tombol Kursi -->
     <div id="operatorWrapper"></div>
 
+    <!-- ======== MODAL KONFIRMASI HAPUS CUSTOM ======== -->
+    <div class="modal-overlay" id="modalConfirm">
+        <div class="modal-box">
+            <h4>Konfirmasi Hapus</h4>
+            <p>Apakah Anda yakin ingin menghapus Blok <strong id="modalBlockCode"></strong>?</p>
+            <div class="modal-actions">
+                <button class="btn-modal-cancel" onclick="batalHapus()">Batal</button>
+                <button class="btn-modal-confirm" onclick="eksekusiHapus()">Ya, Hapus</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const firebaseConfig = {
             databaseURL: "https://monitoring-tatib-default-rtdb.asia-southeast1.firebasedatabase.app"
@@ -98,6 +133,7 @@
         const db = firebase.database().ref('seminar_seats');
 
         let state = { blocks: [] };
+        let blockYangAkanDihapus = null; // Variabel penyimpan blok sementara untuk modal hapus
 
         // Dengarkan Perubahan Data secara Real-Time
         db.on('value', (snapshot) => {
@@ -132,12 +168,27 @@
             syncToFirebase();
         }
 
+        // ================== PERBAIKAN FITUR HAPUS UNTUK HP ==================
         function hapusBlok(blockCode) {
-            if (confirm(`Hapus Blok ${blockCode}?`)) {
-                state.blocks = state.blocks.filter(b => b.code !== blockCode);
+            // Membuka modal HTML daripada menggunakan confirm() bawaan peramban
+            blockYangAkanDihapus = blockCode;
+            document.getElementById('modalBlockCode').innerText = blockCode;
+            document.getElementById('modalConfirm').classList.add('active');
+        }
+
+        function batalHapus() {
+            blockYangAkanDihapus = null;
+            document.getElementById('modalConfirm').classList.remove('active');
+        }
+
+        function eksekusiHapus() {
+            if (blockYangAkanDihapus) {
+                state.blocks = state.blocks.filter(b => b.code !== blockYangAkanDihapus);
                 syncToFirebase();
+                batalHapus(); // Tutup modal setelah menghapus
             }
         }
+        // ====================================================================
 
         // Fitur Set Seluruh Kursi dalam Blok Jadi Penuh
         function setBlockFull(blockCode) {
