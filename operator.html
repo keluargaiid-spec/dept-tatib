@@ -10,17 +10,28 @@
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 15px; background: #f4f4f9; color: #333; margin: 0; }
-        h2 { margin-top: 0; font-size: 1.3rem; }
+        h2 { margin-top: 0; font-size: 1.3rem; text-align: center; margin-bottom: 15px; }
         
-        button, input { touch-action: manipulation; }
+        button, input, select { touch-action: manipulation; }
 
+        /* TAB MENU NAVIGATION */
+        .tab-menu { display: flex; gap: 5px; margin-bottom: 15px; border-bottom: 2px solid #ccc; }
+        .tab-btn { flex: 1; padding: 10px 5px; background: #e0e0e0; border: none; border-radius: 6px 6px 0 0; font-weight: bold; font-size: 0.85rem; cursor: pointer; color: #555; text-align: center; }
+        .tab-btn.active { background: #2196F3; color: white; }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* CARD & FORMS */
         .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
         
         .form-group { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
         .input-item { display: flex; flex-direction: column; gap: 5px; }
-        .input-item input { padding: 8px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; }
+        .input-item input, .select-block { padding: 9px; border: 1px solid #ccc; border-radius: 4px; font-size: 0.9rem; }
+        .select-block { width: 100%; font-weight: bold; background: #fff; margin-bottom: 15px; }
         .btn-add { padding: 9px 15px; background-color: #2196F3; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
         
+        /* TABLE REKAPITULASI */
         .summary-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
         .summary-table th, .summary-table td { padding: 8px; text-align: center; border: 1px solid #ddd; }
         .summary-table th { background-color: #f0f0f0; }
@@ -28,22 +39,30 @@
         .text-kosong { color: #2e7d32; font-weight: bold; }
         .text-terisi { color: #c62828; font-weight: bold; }
 
-        .block-card { background: white; padding: 15px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        /* HEADER BLOK & TOMBOL AKSI */
+        .block-card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         .block-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
-        .block-header h3 { margin: 0; font-size: 1.1rem; }
+        .block-header h3 { margin: 0; font-size: 1rem; }
         
-        /* Kelompok Tombol Aksi Blok */
-        .btn-group { display: flex; gap: 6px; }
-        .btn-action { border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; color: white; }
-        .btn-full { background-color: #e53935; } /* Merah: Penuh */
-        .btn-empty { background-color: #43a047; } /* Hijau: Kosongkan */
-        .btn-delete { background-color: #757575; } /* Abu-abu: Hapus */
+        .btn-group { display: flex; gap: 6px; align-items: center; }
+        .btn-action { border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; color: white; }
+        .btn-full { background-color: #e53935; } 
+        .btn-empty { background-color: #43a047; } 
+        .btn-delete { background-color: #757575; } 
+        .btn-lock { background: #e0e0e0; border: 1px solid #ccc; font-size: 0.9rem; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
         .btn-action:hover { opacity: 0.85; }
 
+        /* GRID KURSI */
         .grid { display: grid; gap: 6px; margin-top: 10px; }
         .seat-btn { height: 38px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75rem; }
+        
+        /* WARNA MODE BISA DIISI (UNLOCKED) */
         .vacant { background-color: #4CAF50; color: white; }
         .occupied { background-color: #f44336; color: white; }
+
+        /* WARNA MODE TERKUNCI (LOCKED) */
+        .vacant-locked { background-color: #d6d6d6 !important; color: #555 !important; cursor: not-allowed; }
+        .occupied-locked { background-color: #4a4a4a !important; color: #fff !important; cursor: not-allowed; }
 
         /* MODAL OVERLAY GENERAL */
         .modal-overlay {
@@ -65,36 +84,15 @@
 
         /* KEYPAD TELEPON CSS */
         .pin-display {
-            font-size: 1.8rem;
-            height: 42px;
-            line-height: 42px;
-            background: #f0f0f0;
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            letter-spacing: 10px;
-            font-weight: bold;
-            color: #333;
+            font-size: 1.8rem; height: 42px; line-height: 42px; background: #f0f0f0;
+            border: 1px solid #ccc; border-radius: 6px; margin-bottom: 15px; letter-spacing: 10px;
+            font-weight: bold; color: #333;
         }
-        .keypad-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 15px;
-        }
+        .keypad-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
         .key-btn {
-            height: 50px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            border: 1px solid #ddd;
-            background: #f9f9f9;
-            border-radius: 50%;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            user-select: none;
-            touch-action: manipulation;
+            height: 50px; font-size: 1.2rem; font-weight: bold; border: 1px solid #ddd;
+            background: #f9f9f9; border-radius: 50%; cursor: pointer; display: flex;
+            align-items: center; justify-content: center; user-select: none; touch-action: manipulation;
         }
         .key-btn:active { background: #e0e0e0; }
         .key-btn.btn-action-key { border-radius: 8px; font-size: 0.85rem; }
@@ -106,47 +104,63 @@
 
     <h2>PANEL TATIB - MONITORING KURSI</h2>
 
-    <!-- Form Tambah Blok -->
-    <div class="card">
-        <h3>+ Tambah Blok Kursi Baru</h3>
-        <div class="form-group">
-            <div class="input-item">
-                <label for="blockCode">Kode Blok:</label>
-                <input type="text" id="blockCode" placeholder="A, B1" style="width: 80px;">
+    <!-- TAB MENU -->
+    <div class="tab-menu">
+        <button class="tab-btn active" id="btn-tab-isi" onclick="switchTab('isi')">Isi Hadirin</button>
+        <button class="tab-btn" id="btn-tab-tambah" onclick="switchTab('tambah')">Tambah Blok</button>
+        <button class="tab-btn" id="btn-tab-rekap" onclick="switchTab('rekap')">Rekapitulasi</button>
+    </div>
+
+    <!-- TAB 1: ISI HADIRIN -->
+    <div id="tab-isi" class="tab-content active">
+        <select id="blockSelect" class="select-block" onchange="onSelectBlockChange(this.value)">
+            <option value="">-- Pilih Blok Kursi --</option>
+        </select>
+        <div id="isiBlockWrapper"></div>
+    </div>
+
+    <!-- TAB 2: TAMBAH BLOK -->
+    <div id="tab-tambah" class="tab-content">
+        <div class="card">
+            <h3>+ Tambah Blok Kursi Baru</h3>
+            <div class="form-group">
+                <div class="input-item">
+                    <label for="blockCode">Kode Blok:</label>
+                    <input type="text" id="blockCode" placeholder="A, B1" style="width: 80px;">
+                </div>
+                <div class="input-item">
+                    <label for="blockRows">Baris:</label>
+                    <input type="number" id="blockRows" min="1" value="5" style="width: 60px;">
+                </div>
+                <div class="input-item">
+                    <label for="blockCols">Kolom:</label>
+                    <input type="number" id="blockCols" min="1" value="6" style="width: 60px;">
+                </div>
+                <button class="btn-add" onclick="mintaSandi('TAMBAH_HAPUS', tambahBlok)">Tambah</button>
             </div>
-            <div class="input-item">
-                <label for="blockRows">Baris:</label>
-                <input type="number" id="blockRows" min="1" value="5" style="width: 60px;">
-            </div>
-            <div class="input-item">
-                <label for="blockCols">Kolom:</label>
-                <input type="number" id="blockCols" min="1" value="6" style="width: 60px;">
-            </div>
-            <button class="btn-add" onclick="mintaSandi('TAMBAH_HAPUS', tambahBlok)">Tambah</button>
         </div>
     </div>
 
-    <!-- Tabel Rekapitulasi Data -->
-    <div class="card">
-        <h3>📊 Rekapitulasi Kapasitas</h3>
-        <table class="summary-table">
-            <thead>
-                <tr>
-                    <th>Blok</th>
-                    <th>Kursi</th>
-                    <th>Kosong</th>
-                    <th>Terisi</th>
-                </tr>
-            </thead>
-            <tbody id="opTableBody">
-                <tr><td colspan="4">Memuat data...</td></tr>
-            </tbody>
-            <tfoot id="opTableFoot"></tfoot>
-        </table>
+    <!-- TAB 3: REKAPITULASI -->
+    <div id="tab-rekap" class="tab-content">
+        <div class="card">
+            <h3>📊 Rekapitulasi Kapasitas</h3>
+            <table class="summary-table">
+                <thead>
+                    <tr>
+                        <th>Blok</th>
+                        <th>Kursi</th>
+                        <th>Kosong</th>
+                        <th>Terisi</th>
+                    </tr>
+                </thead>
+                <tbody id="opTableBody">
+                    <tr><td colspan="4">Memuat data...</td></tr>
+                </tbody>
+                <tfoot id="opTableFoot"></tfoot>
+            </table>
+        </div>
     </div>
-
-    <!-- Container Tombol Kursi -->
-    <div id="operatorWrapper"></div>
 
     <!-- MODAL KEYPAD TELEPON -->
     <div class="modal-overlay" id="pinModal">
@@ -192,25 +206,270 @@
         const db = firebase.database().ref('seminar_seats');
 
         let state = { blocks: [] };
+        let selectedBlockCode = null;
+        let isLocked = false; 
         let blockYangAkanDihapus = null;
 
-        // SANSI PIN AKSES
-        const SANDI_TAMBAH_HAPUS = "589"; // Sandi untuk tombol Tambah (biru) & Hapus (abu-abu)
-        const SANDI_PENUH_KOSONG = "1"; // Sandi untuk tombol Penuh (merah) & Kosongkan (hijau)
+        // SANDI PIN AKSES
+        const SANDI_TAMBAH_HAPUS = "1234";
+        const SANDI_PENUH_KOSONG = "5678";
 
         let targetSandi = "";
         let inputSandi = "";
         let aksiTertunda = null;
 
-        // Dengarkan Perubahan Data secara Real-Time
+        // PERUBAHAN DATA REALTIME
         db.on('value', (snapshot) => {
             const data = snapshot.val();
             state = data || { blocks: [] };
-            renderOperator();
+            renderAll();
         });
 
         function syncToFirebase() {
             db.set(state);
+        }
+
+        // --- SISTEM SWITCH TAB ---
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+            document.getElementById(`tab-${tabName}`).classList.add('active');
+            document.getElementById(`btn-tab-${tabName}`).classList.add('active');
+        }
+
+        function toggleLock() {
+            isLocked = !isLocked;
+            renderIsiHadirin();
+        }
+
+        function onSelectBlockChange(val) {
+            selectedBlockCode = val;
+            renderIsiHadirin();
+        }
+
+        // --- RENDER SEMUA TAB ---
+        function renderAll() {
+            updateDropdownOptions();
+            renderIsiHadirin();
+            renderRekapitulasi();
+        }
+
+        function updateDropdownOptions() {
+            const blockSelect = document.getElementById('blockSelect');
+            const blocks = getBlocksArray();
+
+            const currentVal = selectedBlockCode;
+            blockSelect.innerHTML = '';
+
+            if (blocks.length === 0) {
+                blockSelect.innerHTML = '<option value="">-- Belum Ada Blok --</option>';
+                selectedBlockCode = null;
+                return;
+            }
+
+            blocks.forEach(b => {
+                const opt = document.createElement('option');
+                opt.value = b.code;
+                opt.textContent = `Blok ${b.code} (${b.rows}x${b.cols})`;
+                blockSelect.appendChild(opt);
+            });
+
+            if (currentVal && blocks.some(b => b.code === currentVal)) {
+                blockSelect.value = currentVal;
+                selectedBlockCode = currentVal;
+            } else {
+                selectedBlockCode = blocks[0].code;
+                blockSelect.value = selectedBlockCode;
+            }
+        }
+
+        function getBlocksArray() {
+            if (!state.blocks) return [];
+            return Array.isArray(state.blocks) ? state.blocks : Object.values(state.blocks);
+        }
+
+        // RENDER TAB 1: ISI HADIRIN
+        function renderIsiHadirin() {
+            const wrapper = document.getElementById('isiBlockWrapper');
+            wrapper.innerHTML = '';
+
+            const blocks = getBlocksArray();
+            if (blocks.length === 0 || !selectedBlockCode) {
+                wrapper.innerHTML = '<div class="card"><p style="text-align:center; color:#777;">Tidak ada blok dipilih atau data kosong.</p></div>';
+                return;
+            }
+
+            const block = blocks.find(b => b.code === selectedBlockCode);
+            if (!block) return;
+
+            const seats = block.seats 
+                ? (Array.isArray(block.seats) ? block.seats : Object.values(block.seats))
+                : [];
+
+            const terisiCount = seats.filter(s => s && s.occupied).length;
+
+            const card = document.createElement('div');
+            card.className = 'block-card';
+
+            const header = document.createElement('div');
+            header.className = 'block-header';
+            header.innerHTML = `
+                <h3>Blok ${block.code} (${block.rows}x${block.cols}) - Terisi: ${terisiCount}</h3>
+                <div class="btn-group">
+                    <button class="btn-action btn-full" onclick="mintaSandi('PENUH_KOSONG', () => setBlockFull('${block.code}'))">Penuh</button>
+                    <button class="btn-action btn-empty" onclick="mintaSandi('PENUH_KOSONG', () => setBlockEmpty('${block.code}'))">Kosong</button>
+                    <button class="btn-action btn-delete" onclick="mintaSandi('TAMBAH_HAPUS', () => hapusBlok('${block.code}'))">Hapus</button>
+                    <button class="btn-lock" onclick="toggleLock()" title="${isLocked ? 'Buka Kunci untuk Mengisi' : 'Kunci Pengisian'}">
+                        ${isLocked ? '🔐' : '🔓'}
+                    </button>
+                </div>
+            `;
+            card.appendChild(header);
+
+            const grid = document.createElement('div');
+            grid.className = 'grid';
+            grid.style.gridTemplateColumns = `repeat(${block.cols}, 1fr)`;
+
+            seats.forEach((seat, idx) => {
+                if (!seat) return;
+                const btn = document.createElement('button');
+                btn.innerText = `${seat.r},${seat.c}`;
+
+                if (isLocked) {
+                    btn.className = `seat-btn ${seat.occupied ? 'occupied-locked' : 'vacant-locked'}`;
+                    btn.onclick = null;
+                } else {
+                    btn.className = `seat-btn ${seat.occupied ? 'occupied' : 'vacant'}`;
+                    btn.onclick = () => toggleSeat(block.code, idx);
+                }
+                grid.appendChild(btn);
+            });
+
+            card.appendChild(grid);
+            wrapper.appendChild(card);
+        }
+
+        // RENDER TAB 3: REKAPITULASI
+        function renderRekapitulasi() {
+            const opTableBody = document.getElementById('opTableBody');
+            const opTableFoot = document.getElementById('opTableFoot');
+
+            opTableBody.innerHTML = '';
+            opTableFoot.innerHTML = '';
+
+            const blocks = getBlocksArray();
+
+            if (blocks.length === 0) {
+                opTableBody.innerHTML = '<tr><td colspan="4">Belum ada blok ditambahkan.</td></tr>';
+                return;
+            }
+
+            let grandTotal = 0, grandKosong = 0, grandTerisi = 0;
+
+            blocks.forEach(block => {
+                if (!block) return;
+                const seats = block.seats 
+                    ? (Array.isArray(block.seats) ? block.seats : Object.values(block.seats))
+                    : [];
+
+                const total = seats.length;
+                const terisi = seats.filter(s => s && s.occupied).length;
+                const kosong = total - terisi;
+
+                grandTotal += total;
+                grandKosong += kosong;
+                grandTerisi += terisi;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><b>Blok ${block.code}</b></td>
+                    <td>${total}</td>
+                    <td class="text-kosong">${kosong}</td>
+                    <td class="text-terisi">${terisi}</td>
+                `;
+                opTableBody.appendChild(tr);
+            });
+
+            opTableFoot.innerHTML = `
+                <tr>
+                    <td>TOTAL</td>
+                    <td>${grandTotal}</td>
+                    <td class="text-kosong">${grandKosong}</td>
+                    <td class="text-terisi">${grandTerisi}</td>
+                </tr>
+            `;
+        }
+
+        // --- OPERASI AKSI DATA ---
+        function tambahBlok() {
+            const code = document.getElementById('blockCode').value.trim().toUpperCase();
+            const rows = parseInt(document.getElementById('blockRows').value);
+            const cols = parseInt(document.getElementById('blockCols').value);
+
+            if (!code) return alert('Isi Kode Blok!');
+            if (state.blocks && state.blocks.some(b => b.code === code)) return alert('Kode Blok sudah ada!');
+            if (rows < 1 || cols < 1) return alert('Jumlah baris dan kolom minimal 1!');
+
+            const seats = [];
+            for (let r = 1; r <= rows; r++) {
+                for (let c = 1; c <= cols; c++) {
+                    seats.push({ r, c, occupied: false });
+                }
+            }
+
+            if (!state.blocks) state.blocks = [];
+            state.blocks.push({ code, rows, cols, seats });
+            document.getElementById('blockCode').value = '';
+            
+            selectedBlockCode = code;
+            syncToFirebase();
+            switchTab('isi');
+        }
+
+        function hapusBlok(blockCode) {
+            blockYangAkanDihapus = blockCode;
+            document.getElementById('modalBlockCode').innerText = blockCode;
+            document.getElementById('modalConfirm').classList.add('active');
+        }
+
+        function batalHapus() {
+            blockYangAkanDihapus = null;
+            document.getElementById('modalConfirm').classList.remove('active');
+        }
+
+        function eksekusiHapus() {
+            if (blockYangAkanDihapus) {
+                state.blocks = state.blocks.filter(b => b.code !== blockYangAkanDihapus);
+                if (selectedBlockCode === blockYangAkanDihapus) {
+                    selectedBlockCode = null;
+                }
+                syncToFirebase();
+                batalHapus();
+            }
+        }
+
+        function setBlockFull(blockCode) {
+            const block = state.blocks.find(b => b.code === blockCode);
+            if (block && block.seats) {
+                block.seats.forEach(s => s.occupied = true);
+                syncToFirebase();
+            }
+        }
+
+        function setBlockEmpty(blockCode) {
+            const block = state.blocks.find(b => b.code === blockCode);
+            if (block && block.seats) {
+                block.seats.forEach(s => s.occupied = false);
+                syncToFirebase();
+            }
+        }
+
+        function toggleSeat(blockCode, seatIndex) {
+            if (isLocked) return;
+            const block = state.blocks.find(b => b.code === blockCode);
+            block.seats[seatIndex].occupied = !block.seats[seatIndex].occupied;
+            syncToFirebase();
         }
 
         // --- SISTEM KEYPAD PIN TELEPON ---
@@ -260,155 +519,6 @@
                 inputSandi = "";
                 updatePinDisplay();
             }
-        }
-        // ---------------------------------
-
-        function tambahBlok() {
-            const code = document.getElementById('blockCode').value.trim().toUpperCase();
-            const rows = parseInt(document.getElementById('blockRows').value);
-            const cols = parseInt(document.getElementById('blockCols').value);
-
-            if (!code) return alert('Isi Kode Blok!');
-            if (state.blocks && state.blocks.some(b => b.code === code)) return alert('Kode Blok sudah ada!');
-            if (rows < 1 || cols < 1) return alert('Jumlah baris dan kolom minimal 1!');
-
-            const seats = [];
-            for (let r = 1; r <= rows; r++) {
-                for (let c = 1; c <= cols; c++) {
-                    seats.push({ r, c, occupied: false });
-                }
-            }
-
-            if (!state.blocks) state.blocks = [];
-            state.blocks.push({ code, rows, cols, seats });
-            document.getElementById('blockCode').value = '';
-            syncToFirebase();
-        }
-
-        function hapusBlok(blockCode) {
-            blockYangAkanDihapus = blockCode;
-            document.getElementById('modalBlockCode').innerText = blockCode;
-            document.getElementById('modalConfirm').classList.add('active');
-        }
-
-        function batalHapus() {
-            blockYangAkanDihapus = null;
-            document.getElementById('modalConfirm').classList.remove('active');
-        }
-
-        function eksekusiHapus() {
-            if (blockYangAkanDihapus) {
-                state.blocks = state.blocks.filter(b => b.code !== blockYangAkanDihapus);
-                syncToFirebase();
-                batalHapus();
-            }
-        }
-
-        function setBlockFull(blockCode) {
-            const block = state.blocks.find(b => b.code === blockCode);
-            if (block && block.seats) {
-                block.seats.forEach(s => s.occupied = true);
-                syncToFirebase();
-            }
-        }
-
-        function setBlockEmpty(blockCode) {
-            const block = state.blocks.find(b => b.code === blockCode);
-            if (block && block.seats) {
-                block.seats.forEach(s => s.occupied = false);
-                syncToFirebase();
-            }
-        }
-
-        function toggleSeat(blockCode, seatIndex) {
-            const block = state.blocks.find(b => b.code === blockCode);
-            block.seats[seatIndex].occupied = !block.seats[seatIndex].occupied;
-            syncToFirebase();
-        }
-
-        function renderOperator() {
-            const opTableBody = document.getElementById('opTableBody');
-            const opTableFoot = document.getElementById('opTableFoot');
-            const wrapper = document.getElementById('operatorWrapper');
-
-            opTableBody.innerHTML = '';
-            opTableFoot.innerHTML = '';
-            wrapper.innerHTML = '';
-
-            const blocks = state.blocks 
-                ? (Array.isArray(state.blocks) ? state.blocks : Object.values(state.blocks))
-                : [];
-
-            if (blocks.length === 0) {
-                opTableBody.innerHTML = '<tr><td colspan="4">Belum ada blok ditambahkan.</td></tr>';
-                return;
-            }
-
-            let grandTotal = 0, grandKosong = 0, grandTerisi = 0;
-
-            blocks.forEach(block => {
-                if (!block) return;
-                const seats = block.seats 
-                    ? (Array.isArray(block.seats) ? block.seats : Object.values(block.seats))
-                    : [];
-
-                const total = seats.length;
-                const terisi = seats.filter(s => s && s.occupied).length;
-                const kosong = total - terisi;
-
-                grandTotal += total;
-                grandKosong += kosong;
-                grandTerisi += terisi;
-
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><b>Blok ${block.code}</b></td>
-                    <td>${total}</td>
-                    <td class="text-kosong">${kosong}</td>
-                    <td class="text-terisi">${terisi}</td>
-                `;
-                opTableBody.appendChild(tr);
-
-                const card = document.createElement('div');
-                card.className = 'block-card';
-
-                const header = document.createElement('div');
-                header.className = 'block-header';
-                header.innerHTML = `
-                    <h3>Blok ${block.code} (${block.rows}x${block.cols})</h3>
-                    <div class="btn-group">
-                        <button class="btn-action btn-full" onclick="mintaSandi('PENUH_KOSONG', () => setBlockFull('${block.code}'))">Penuh</button>
-                        <button class="btn-action btn-empty" onclick="mintaSandi('PENUH_KOSONG', () => setBlockEmpty('${block.code}'))">Kosongkan</button>
-                        <button class="btn-action btn-delete" onclick="mintaSandi('TAMBAH_HAPUS', () => hapusBlok('${block.code}'))">Hapus</button>
-                    </div>
-                `;
-                card.appendChild(header);
-
-                const grid = document.createElement('div');
-                grid.className = 'grid';
-                grid.style.gridTemplateColumns = `repeat(${block.cols}, 1fr)`;
-
-                seats.forEach((seat, idx) => {
-                    if (!seat) return;
-                    const btn = document.createElement('button');
-                    btn.className = `seat-btn ${seat.occupied ? 'occupied' : 'vacant'}`;
-                    btn.innerText = `${seat.r},${seat.c}`;
-                    btn.onclick = () => toggleSeat(block.code, idx);
-                    grid.appendChild(btn);
-                });
-
-                card.appendChild(grid);
-                wrapper.appendChild(card);
-            });
-
-            opTableFoot.innerHTML = `
-                <tr>
-                    <td>TOTAL</td>
-                    <td>${grandTotal}</td>
-                    <td class="text-kosong">${grandKosong}</td>
-                    <td class="text-terisi">${grandTerisi}</td>
-                </tr>
-            `;
         }
     </script>
 </body>
