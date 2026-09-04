@@ -24,6 +24,7 @@
 
         /* CARD & FORMS */
         .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .card h3 { margin-top: 0; margin-bottom: 15px; font-size: 1.1rem; }
         
         .form-group { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
         .input-item { display: flex; flex-direction: column; gap: 5px; }
@@ -104,11 +105,10 @@
 
     <h2>PANEL TATIB - MONITORING KURSI</h2>
 
-    <!-- TAB MENU -->
+    <!-- TAB MENU (2 TAB) -->
     <div class="tab-menu">
         <button class="tab-btn active" id="btn-tab-isi" onclick="switchTab('isi')">Isi Hadirin</button>
-        <button class="tab-btn" id="btn-tab-tambah" onclick="switchTab('tambah')">Tambah Blok</button>
-        <button class="tab-btn" id="btn-tab-rekap" onclick="switchTab('rekap')">Rekapitulasi</button>
+        <button class="tab-btn" id="btn-tab-tambah-rekap" onclick="switchTab('tambah-rekap')">Tambah & Rekap</button>
     </div>
 
     <!-- TAB 1: ISI HADIRIN -->
@@ -119,8 +119,9 @@
         <div id="isiBlockWrapper"></div>
     </div>
 
-    <!-- TAB 2: TAMBAH BLOK -->
-    <div id="tab-tambah" class="tab-content">
+    <!-- TAB 2: TAMBAH & REKAP -->
+    <div id="tab-tambah-rekap" class="tab-content">
+        <!-- FORM TAMBAH BLOK -->
         <div class="card">
             <h3>+ Tambah Blok Kursi Baru</h3>
             <div class="form-group">
@@ -139,10 +140,8 @@
                 <button class="btn-add" onclick="mintaSandi('TAMBAH_HAPUS', tambahBlok)">Tambah</button>
             </div>
         </div>
-    </div>
 
-    <!-- TAB 3: REKAPITULASI -->
-    <div id="tab-rekap" class="tab-content">
+        <!-- TABEL REKAPITULASI -->
         <div class="card">
             <h3>📊 Rekapitulasi Kapasitas</h3>
             <table class="summary-table">
@@ -211,8 +210,8 @@
         let blockYangAkanDihapus = null;
 
         // SANDI PIN AKSES
-        const SANDI_TAMBAH_HAPUS = "59";
-        const SANDI_PENUH_KOSONG = "";
+        const SANDI_TAMBAH_HAPUS = "1234";
+        const SANDI_PENUH_KOSONG = "5678";
 
         let targetSandi = "";
         let inputSandi = "";
@@ -360,7 +359,7 @@
             wrapper.appendChild(card);
         }
 
-        // RENDER TAB 3: REKAPITULASI
+        // RENDER TABEL REKAPITULASI
         function renderRekapitulasi() {
             const opTableBody = document.getElementById('opTableBody');
             const opTableFoot = document.getElementById('opTableFoot');
