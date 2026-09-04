@@ -222,11 +222,25 @@
         db.on('value', (snapshot) => {
             const data = snapshot.val();
             state = data || { blocks: [] };
+            normalizeBlocksState();
             renderAll();
         });
 
+        function normalizeBlocksState() {
+            if (!state.blocks) {
+                state.blocks = [];
+            } else if (!Array.isArray(state.blocks)) {
+                state.blocks = Object.values(state.blocks);
+            }
+        }
+
         function syncToFirebase() {
             db.set(state);
+        }
+
+        function getBlocksArray() {
+            normalizeBlocksState();
+            return state.blocks;
         }
 
         // --- SISTEM SWITCH TAB ---
@@ -269,24 +283,20 @@
             }
 
             blocks.forEach(b => {
+                if (!b) return;
                 const opt = document.createElement('option');
                 opt.value = b.code;
                 opt.textContent = `Blok ${b.code} (${b.rows}x${b.cols})`;
                 blockSelect.appendChild(opt);
             });
 
-            if (currentVal && blocks.some(b => b.code === currentVal)) {
+            if (currentVal && blocks.some(b => b && b.code === currentVal)) {
                 blockSelect.value = currentVal;
                 selectedBlockCode = currentVal;
             } else {
-                selectedBlockCode = blocks[0].code;
-                blockSelect.value = selectedBlockCode;
+                selectedBlockCode = blocks[0] ? blocks[0].code : null;
+                if (selectedBlockCode) blockSelect.value = selectedBlockCode;
             }
-        }
-
-        function getBlocksArray() {
-            if (!state.blocks) return [];
-            return Array.isArray(state.blocks) ? state.blocks : Object.values(state.blocks);
         }
 
         // RENDER TAB 1: ISI HADIRIN
@@ -300,7 +310,7 @@
                 return;
             }
 
-            const block = blocks.find(b => b.code === selectedBlockCode);
+            const block = blocks.find(b => b && b.code === selectedBlockCode);
             if (!block) return;
 
             const seats = block.seats 
@@ -403,13 +413,19 @@
 
         // --- OPERASI AKSI DATA ---
         function tambahBlok() {
-            const code = document.getElementById('blockCode').value.trim().toUpperCase();
-            const rows = parseInt(document.getElementById('blockRows').value);
-            const cols = parseInt(document.getElementById('blockCols').value);
+            const codeInput = document.getElementById('blockCode');
+            const rowsInput = document.getElementById('blockRows');
+            const colsInput = document.getElementById('blockCols');
+
+            const code = codeInput.value.trim().toUpperCase();
+            const rows = parseInt(rowsInput.value);
+            const cols = parseInt(colsInput.value);
 
             if (!code) return alert('Isi Kode Blok!');
-            if (state.blocks && state.blocks.some(b => b.code === code)) return alert('Kode Blok sudah ada!');
-            if (rows < 1 || cols < 1) return alert('Jumlah baris dan kolom minimal 1!');
+            
+            const blocks = getBlocksArray();
+            if (blocks.some(b => b && b.code === code)) return alert('Kode Blok sudah ada!');
+            if (isNaN(rows) || isNaN(cols) || rows < 1 || cols < 1) return alert('Jumlah baris dan kolom minimal 1!');
 
             const seats = [];
             for (let r = 1; r <= rows; r++) {
@@ -418,10 +434,10 @@
                 }
             }
 
-            if (!state.blocks) state.blocks = [];
-            state.blocks.push({ code, rows, cols, seats });
-            document.getElementById('blockCode').value = '';
+            blocks.push({ code, rows, cols, seats });
+            state.blocks = blocks;
             
+            codeInput.value = '';
             selectedBlockCode = code;
             syncToFirebase();
             switchTab('isi');
@@ -440,7 +456,8 @@
 
         function eksekusiHapus() {
             if (blockYangAkanDihapus) {
-                state.blocks = state.blocks.filter(b => b.code !== blockYangAkanDihapus);
+                const blocks = getBlocksArray();
+                state.blocks = blocks.filter(b => b && b.code !== blockYangAkanDihapus);
                 if (selectedBlockCode === blockYangAkanDihapus) {
                     selectedBlockCode = null;
                 }
@@ -450,26 +467,39 @@
         }
 
         function setBlockFull(blockCode) {
-            const block = state.blocks.find(b => b.code === blockCode);
+            const blocks = getBlocksArray();
+            const block = blocks.find(b => b && b.code === blockCode);
             if (block && block.seats) {
-                block.seats.forEach(s => s.occupied = true);
+                const seats = Array.isArray(block.seats) ? block.seats : Object.values(block.seats);
+                seats.forEach(s => { if (s) s.occupied = true; });
+                block.seats = seats;
                 syncToFirebase();
             }
         }
 
         function setBlockEmpty(blockCode) {
-            const block = state.blocks.find(b => b.code === blockCode);
+            const blocks = getBlocksArray();
+            const block = blocks.find(b => b && b.code === blockCode);
             if (block && block.seats) {
-                block.seats.forEach(s => s.occupied = false);
+                const seats = Array.isArray(block.seats) ? block.seats : Object.values(block.seats);
+                seats.forEach(s => { if (s) s.occupied = false; });
+                block.seats = seats;
                 syncToFirebase();
             }
         }
 
         function toggleSeat(blockCode, seatIndex) {
             if (isLocked) return;
-            const block = state.blocks.find(b => b.code === blockCode);
-            block.seats[seatIndex].occupied = !block.seats[seatIndex].occupied;
-            syncToFirebase();
+            const blocks = getBlocksArray();
+            const block = blocks.find(b => b && b.code === blockCode);
+            if (block && block.seats) {
+                const seats = Array.isArray(block.seats) ? block.seats : Object.values(block.seats);
+                if (seats[seatIndex]) {
+                    seats[seatIndex].occupied = !seats[seatIndex].occupied;
+                    block.seats = seats;
+                    syncToFirebase();
+                }
+            }
         }
 
         // --- SISTEM KEYPAD PIN TELEPON ---
