@@ -2,547 +2,78 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Panel Tatib - Operator</title>
-    <!-- Firebase SDK Compat -->
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Monitoring Tatib Kursi</title>
     <style>
-        * { box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 15px; background: #f4f4f9; color: #333; margin: 0; }
-        h2 { margin-top: 0; font-size: 1.3rem; text-align: center; margin-bottom: 15px; }
-        
-        button, input, select { touch-action: manipulation; }
-
-        /* TAB NAVIGATION */
-        .tab-menu { display: flex; gap: 5px; margin-bottom: 15px; border-bottom: 2px solid #ccc; }
-        .tab-btn { flex: 1; padding: 12px 5px; background: #e0e0e0; border: none; border-radius: 6px 6px 0 0; font-weight: bold; font-size: 0.85rem; cursor: pointer; color: #555; text-align: center; }
-        .tab-btn.active { background: #2196F3; color: white; }
-        
-        .tab-content { display: none; }
-        .tab-content.active { display: block; }
-
-        /* CARDS & FORMS */
-        .card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .card h3 { margin-top: 0; margin-bottom: 15px; font-size: 1.1rem; }
-        
-        .form-group { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
-        .input-item { display: flex; flex-direction: column; gap: 5px; }
-        .input-item input, .select-block { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.9rem; }
-        .select-block { width: 100%; font-weight: bold; background: #fff; margin-bottom: 15px; }
-        .btn-add { padding: 10px 18px; background-color: #2196F3; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        
-        /* SUMMARY TABLE */
-        .summary-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
-        .summary-table th, .summary-table td { padding: 8px; text-align: center; border: 1px solid #ddd; }
-        .summary-table th { background-color: #f0f0f0; }
-        .summary-table tfoot tr { background-color: #e8e8e8; font-weight: bold; }
-        .text-kosong { color: #2e7d32; font-weight: bold; }
-        .text-terisi { color: #c62828; font-weight: bold; }
-
-        /* BLOCK CARDS & ACTIONS */
-        .block-card { background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .block-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 10px; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
-        .block-header h3 { margin: 0; font-size: 1rem; }
-        
-        .btn-group { display: flex; gap: 6px; align-items: center; }
-        .btn-action { border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; color: white; }
-        .btn-full { background-color: #e53935; } 
-        .btn-empty { background-color: #43a047; } 
-        .btn-delete { background-color: #757575; } 
-        .btn-lock { background: #e0e0e0; border: 1px solid #ccc; font-size: 0.9rem; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
-        .btn-action:hover { opacity: 0.85; }
-
-        /* SEAT GRID */
-        .grid { display: grid; gap: 6px; margin-top: 10px; }
-        .seat-btn { height: 38px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.75rem; }
-        
-        /* UNLOCKED SEAT COLORS */
-        .vacant { background-color: #4CAF50; color: white; }
-        .occupied { background-color: #f44336; color: white; }
-
-        /* LOCKED SEAT COLORS */
-        .vacant-locked { background-color: #d6d6d6 !important; color: #555 !important; cursor: not-allowed; }
-        .occupied-locked { background-color: #4a4a4a !important; color: #fff !important; cursor: not-allowed; }
-
-        /* MODAL OVERLAY */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center;
-            opacity: 0; pointer-events: none; transition: opacity 0.2s ease; z-index: 9999;
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: #0f172a;
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
         }
-        .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal-box {
-            background: white; padding: 20px; border-radius: 12px; max-width: 320px; width: 90%; text-align: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        .container {
+            max-width: 500px;
+            width: 100%;
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 32px 24px;
+            text-align: center;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
         }
-        .modal-box h4 { margin-top: 0; color: #333; font-size: 1.1rem; }
-        .modal-box p { color: #555; font-size: 0.9rem; margin-bottom: 20px; }
-        .modal-actions { display: flex; gap: 10px; justify-content: center; }
-        .modal-actions button { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; color: white; width: 100%;}
-        .btn-modal-cancel { background: #9e9e9e; }
-        .btn-modal-confirm { background: #e53935; }
-
-        /* KEYPAD PIN CSS */
-        .pin-display {
-            font-size: 1.8rem; height: 42px; line-height: 42px; background: #f0f0f0;
-            border: 1px solid #ccc; border-radius: 6px; margin-bottom: 15px; letter-spacing: 10px;
-            font-weight: bold; color: #333;
+        h1 { font-size: 24px; margin-bottom: 8px; color: #38bdf8; }
+        p { color: #94a3b8; font-size: 14px; margin-bottom: 28px; }
+        .nav-buttons { display: flex; flex-direction: column; gap: 16px; }
+        .btn-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 20px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            color: #f8fafc;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.2s ease;
         }
-        .keypad-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
-        .key-btn {
-            height: 50px; font-size: 1.2rem; font-weight: bold; border: 1px solid #ddd;
-            background: #f9f9f9; border-radius: 50%; cursor: pointer; display: flex;
-            align-items: center; justify-content: center; user-select: none; touch-action: manipulation;
+        .btn-card:hover {
+            border-color: #38bdf8;
+            background: #1e293b;
+            transform: translateY(-2px);
         }
-        .key-btn:active { background: #e0e0e0; }
-        .key-btn.btn-action-key { border-radius: 8px; font-size: 0.85rem; }
-        .key-btn.btn-confirm-key { background: #4caf50; color: white; border: none; }
-        .key-btn.btn-delete-key { background: #ff9800; color: white; border: none; }
+        .btn-card span.icon { font-size: 24px; }
+        .btn-card .desc { font-size: 12px; color: #64748b; font-weight: normal; text-align: left; margin-top: 2px; }
     </style>
 </head>
 <body>
+    <div class="container">
+        <h1>PANEL TATIB MONITORING</h1>
+        <p>Sistem Pengawasan & Management Kursi Pertemuan Real-Time</p>
 
-    <h2>PANEL TATIB - MONITORING KURSI</h2>
-
-    <!-- TAB MENU -->
-    <div class="tab-menu">
-        <button class="tab-btn active" id="btn-tab-isi" onclick="switchTab('isi')">Isi Hadirin</button>
-        <button class="tab-btn" id="btn-tab-tambah-rekap" onclick="switchTab('tambah-rekap')">Tambah & Rekap</button>
-    </div>
-
-    <!-- TAB 1: ISI HADIRIN -->
-    <div id="tab-isi" class="tab-content active">
-        <select id="blockSelect" class="select-block" onchange="onSelectBlockChange(this.value)">
-            <option value="">-- Pilih Blok Kursi --</option>
-        </select>
-        <div id="isiBlockWrapper"></div>
-    </div>
-
-    <!-- TAB 2: TAMBAH & REKAP -->
-    <div id="tab-tambah-rekap" class="tab-content">
-        <div class="card">
-            <h3>+ Tambah Blok Kursi Baru</h3>
-            <div class="form-group">
-                <div class="input-item">
-                    <label for="blockCode">Kode Blok:</label>
-                    <input type="text" id="blockCode" placeholder="A, B1" style="width: 80px;">
+        <div class="nav-buttons">
+            <a href="operator.html" class="btn-card">
+                <div style="text-align: left;">
+                    <div>Panel Operator / Tatib</div>
+                    <div class="desc">Input kehadiran, buat blok, dan kelola kursi</div>
                 </div>
-                <div class="input-item">
-                    <label for="blockRows">Baris:</label>
-                    <input type="number" id="blockRows" min="1" value="5" style="width: 60px;">
-                </div>
-                <div class="input-item">
-                    <label for="blockCols">Kolom:</label>
-                    <input type="number" id="blockCols" min="1" value="6" style="width: 60px;">
-                </div>
-                <button class="btn-add" onclick="mintaSandi('TAMBAH_HAPUS', tambahBlok)">Tambah</button>
-            </div>
-        </div>
+                <span class="icon">📱</span>
+            </a>
 
-        <div class="card">
-            <h3>📊 Rekapitulasi Kapasitas</h3>
-            <table class="summary-table">
-                <thead>
-                    <tr>
-                        <th>Blok</th>
-                        <th>Kursi</th>
-                        <th>Kosong</th>
-                        <th>Terisi</th>
-                    </tr>
-                </thead>
-                <tbody id="opTableBody">
-                    <tr><td colspan="4">Memuat data...</td></tr>
-                </tbody>
-                <tfoot id="opTableFoot"></tfoot>
-            </table>
+            <a href="display.html" class="btn-card">
+                <div style="text-align: left;">
+                    <div>Layar Display HDMI</div>
+                    <div class="desc">Tampilan penuh untuk Layar TV / Proyektor</div>
+                </div>
+                <span class="icon">🖥️</span>
+            </a>
         </div>
     </div>
-
-    <!-- MODAL KEYPAD PIN -->
-    <div class="modal-overlay" id="pinModal">
-        <div class="modal-box">
-            <h4 style="margin-bottom: 10px;">Masukkan PIN Akses</h4>
-            <div class="pin-display" id="pinDisplay"></div>
-            <div class="keypad-grid">
-                <button class="key-btn" onclick="tekanAngka('1')">1</button>
-                <button class="key-btn" onclick="tekanAngka('2')">2</button>
-                <button class="key-btn" onclick="tekanAngka('3')">3</button>
-                <button class="key-btn" onclick="tekanAngka('4')">4</button>
-                <button class="key-btn" onclick="tekanAngka('5')">5</button>
-                <button class="key-btn" onclick="tekanAngka('6')">6</button>
-                <button class="key-btn" onclick="tekanAngka('7')">7</button>
-                <button class="key-btn" onclick="tekanAngka('8')">8</button>
-                <button class="key-btn" onclick="tekanAngka('9')">9</button>
-                <button class="key-btn btn-action-key btn-delete-key" onclick="hapusAngka()">⌫</button>
-                <button class="key-btn" onclick="tekanAngka('0')">0</button>
-                <button class="key-btn btn-action-key btn-confirm-key" onclick="verifikasiPin()">OK</button>
-            </div>
-            <button class="btn-modal-cancel" onclick="batalPin()" style="width:100%; padding:10px; border:none; border-radius:6px; font-weight:bold; color:white; cursor:pointer;">Batal</button>
-        </div>
-    </div>
-
-    <!-- MODAL KONFIRMASI HAPUS -->
-    <div class="modal-overlay" id="modalConfirm">
-        <div class="modal-box">
-            <h4>Konfirmasi Hapus</h4>
-            <p>Apakah Anda yakin ingin menghapus Blok <strong id="modalBlockCode"></strong>?</p>
-            <div class="modal-actions">
-                <button class="btn-modal-cancel" onclick="batalHapus()">Batal</button>
-                <button class="btn-modal-confirm" onclick="eksekusiHapus()">Ya, Hapus</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // FIREBASE CONFIGURATION
-        const firebaseConfig = {
-            databaseURL: "https://monitoring-tatib-default-rtdb.asia-southeast1.firebasedatabase.app"
-        };
-        
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.database().ref('seminar_seats');
-
-        let state = { blocks: [] };
-        let selectedBlockCode = null;
-        let isLocked = false; 
-        let blockYangAkanDihapus = null;
-
-        // SANDI PIN AKSES
-        const SANDI_TAMBAH_HAPUS = "1234";
-        const SANDI_PENUH_KOSONG = "5678";
-
-        let targetSandi = "";
-        let inputSandi = "";
-        let aksiTertunda = null;
-
-        db.on('value', (snapshot) => {
-            const data = snapshot.val();
-            state = data || { blocks: [] };
-            normalizeBlocksState();
-            renderAll();
-        }, (err) => {
-            console.error("Firebase Error:", err);
-        });
-
-        function normalizeBlocksState() {
-            if (!state.blocks) {
-                state.blocks = [];
-            } else if (!Array.isArray(state.blocks)) {
-                state.blocks = Object.values(state.blocks);
-            }
-        }
-
-        function syncToFirebase() {
-            db.set(state);
-        }
-
-        function getBlocksArray() {
-            normalizeBlocksState();
-            return state.blocks;
-        }
-
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-
-            document.getElementById(`tab-${tabName}`).classList.add('active');
-            document.getElementById(`btn-tab-${tabName}`).classList.add('active');
-        }
-
-        function toggleLock() {
-            isLocked = !isLocked;
-            renderIsiHadirin();
-        }
-
-        function onSelectBlockChange(val) {
-            selectedBlockCode = val;
-            renderIsiHadirin();
-        }
-
-        function renderAll() {
-            updateDropdownOptions();
-            renderIsiHadirin();
-            renderRekapitulasi();
-        }
-
-        function updateDropdownOptions() {
-            const blockSelect = document.getElementById('blockSelect');
-            const blocks = getBlocksArray();
-
-            const currentVal = selectedBlockCode;
-            blockSelect.innerHTML = '';
-
-            if (blocks.length === 0) {
-                blockSelect.innerHTML = '<option value="">-- Belum Ada Blok --</option>';
-                selectedBlockCode = null;
-                return;
-            }
-
-            blocks.forEach(b => {
-                if (!b) return;
-                const opt = document.createElement('option');
-                opt.value = b.code;
-                opt.textContent = `Blok ${b.code} (${b.rows}x${b.cols})`;
-                blockSelect.appendChild(opt);
-            });
-
-            if (currentVal && blocks.some(b => b && b.code === currentVal)) {
-                blockSelect.value = currentVal;
-                selectedBlockCode = currentVal;
-            } else {
-                selectedBlockCode = blocks[0] ? blocks[0].code : null;
-                if (selectedBlockCode) blockSelect.value = selectedBlockCode;
-            }
-        }
-
-        function renderIsiHadirin() {
-            const wrapper = document.getElementById('isiBlockWrapper');
-            wrapper.innerHTML = '';
-
-            const blocks = getBlocksArray();
-            if (blocks.length === 0 || !selectedBlockCode) {
-                wrapper.innerHTML = '<div class="card"><p style="text-align:center; color:#777;">Tidak ada blok dipilih atau data kosong.</p></div>';
-                return;
-            }
-
-            const block = blocks.find(b => b && b.code === selectedBlockCode);
-            if (!block) return;
-
-            const seats = block.seats 
-                ? (Array.isArray(block.seats) ? block.seats : Object.values(block.seats))
-                : [];
-
-            const terisiCount = seats.filter(s => s && s.occupied).length;
-
-            const card = document.createElement('div');
-            card.className = 'block-card';
-
-            const header = document.createElement('div');
-            header.className = 'block-header';
-            header.innerHTML = `
-                <h3>Blok ${block.code} (${block.rows}x${block.cols}) - Terisi: ${terisiCount}</h3>
-                <div class="btn-group">
-                    <button class="btn-action btn-full" onclick="mintaSandi('PENUH_KOSONG', () => setBlockFull('${block.code}'))">Penuh</button>
-                    <button class="btn-action btn-empty" onclick="mintaSandi('PENUH_KOSONG', () => setBlockEmpty('${block.code}'))">Kosong</button>
-                    <button class="btn-action btn-delete" onclick="mintaSandi('TAMBAH_HAPUS', () => hapusBlok('${block.code}'))">Hapus</button>
-                    <button class="btn-lock" onclick="toggleLock()" title="${isLocked ? 'Buka Kunci untuk Mengisi' : 'Kunci Pengisian'}">
-                        ${isLocked ? '🔒' : '🔓'}
-                    </button>
-                </div>
-            `;
-            card.appendChild(header);
-
-            const grid = document.createElement('div');
-            grid.className = 'grid';
-            grid.style.gridTemplateColumns = `repeat(${block.cols}, 1fr)`;
-
-            seats.forEach((seat, idx) => {
-                if (!seat) return;
-                const btn = document.createElement('button');
-                btn.innerText = `${seat.r},${seat.c}`;
-
-                if (isLocked) {
-                    btn.className = `seat-btn ${seat.occupied ? 'occupied-locked' : 'vacant-locked'}`;
-                    btn.onclick = null;
-                } else {
-                    btn.className = `seat-btn ${seat.occupied ? 'occupied' : 'vacant'}`;
-                    btn.onclick = () => toggleSeat(block.code, idx);
-                }
-                grid.appendChild(btn);
-            });
-
-            card.appendChild(grid);
-            wrapper.appendChild(card);
-        }
-
-        function renderRekapitulasi() {
-            const opTableBody = document.getElementById('opTableBody');
-            const opTableFoot = document.getElementById('opTableFoot');
-
-            opTableBody.innerHTML = '';
-            opTableFoot.innerHTML = '';
-
-            const blocks = getBlocksArray();
-
-            if (blocks.length === 0) {
-                opTableBody.innerHTML = '<tr><td colspan="4">Belum ada blok ditambahkan.</td></tr>';
-                return;
-            }
-
-            let grandTotal = 0, grandKosong = 0, grandTerisi = 0;
-
-            blocks.forEach(block => {
-                if (!block) return;
-                const seats = block.seats 
-                    ? (Array.isArray(block.seats) ? block.seats : Object.values(block.seats))
-                    : [];
-
-                const total = seats.length;
-                const terisi = seats.filter(s => s && s.occupied).length;
-                const kosong = total - terisi;
-
-                grandTotal += total;
-                grandKosong += kosong;
-                grandTerisi += terisi;
-
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td><b>Blok ${block.code}</b></td>
-                    <td>${total}</td>
-                    <td class="text-kosong">${kosong}</td>
-                    <td class="text-terisi">${terisi}</td>
-                `;
-                opTableBody.appendChild(tr);
-            });
-
-            opTableFoot.innerHTML = `
-                <tr>
-                    <td>TOTAL</td>
-                    <td>${grandTotal}</td>
-                    <td class="text-kosong">${grandKosong}</td>
-                    <td class="text-terisi">${grandTerisi}</td>
-                </tr>
-            `;
-        }
-
-        function tambahBlok() {
-            const codeInput = document.getElementById('blockCode');
-            const rowsInput = document.getElementById('blockRows');
-            const colsInput = document.getElementById('blockCols');
-
-            const code = codeInput.value.trim().toUpperCase();
-            const rows = parseInt(rowsInput.value);
-            const cols = parseInt(colsInput.value);
-
-            if (!code) return alert('Isi Kode Blok!');
-            
-            const blocks = getBlocksArray();
-            if (blocks.some(b => b && b.code === code)) return alert('Kode Blok sudah ada!');
-            if (isNaN(rows) || isNaN(cols) || rows < 1 || cols < 1) return alert('Jumlah baris dan kolom minimal 1!');
-
-            const seats = [];
-            for (let r = 1; r <= rows; r++) {
-                for (let c = 1; c <= cols; c++) {
-                    seats.push({ r, c, occupied: false });
-                }
-            }
-
-            blocks.push({ code, rows, cols, seats });
-            state.blocks = blocks;
-            
-            codeInput.value = '';
-            selectedBlockCode = code;
-            syncToFirebase();
-            switchTab('isi');
-        }
-
-        function hapusBlok(blockCode) {
-            blockYangAkanDihapus = blockCode;
-            document.getElementById('modalBlockCode').innerText = blockCode;
-            document.getElementById('modalConfirm').classList.add('active');
-        }
-
-        function batalHapus() {
-            blockYangAkanDihapus = null;
-            document.getElementById('modalConfirm').classList.remove('active');
-        }
-
-        function eksekusiHapus() {
-            if (blockYangAkanDihapus) {
-                const blocks = getBlocksArray();
-                state.blocks = blocks.filter(b => b && b.code !== blockYangAkanDihapus);
-                if (selectedBlockCode === blockYangAkanDihapus) {
-                    selectedBlockCode = null;
-                }
-                syncToFirebase();
-                batalHapus();
-            }
-        }
-
-        function setBlockFull(blockCode) {
-            const blocks = getBlocksArray();
-            const block = blocks.find(b => b && b.code === blockCode);
-            if (block && block.seats) {
-                const seats = Array.isArray(block.seats) ? block.seats : Object.values(block.seats);
-                seats.forEach(s => { if (s) s.occupied = true; });
-                block.seats = seats;
-                syncToFirebase();
-            }
-        }
-
-        function setBlockEmpty(blockCode) {
-            const blocks = getBlocksArray();
-            const block = blocks.find(b => b && b.code === blockCode);
-            if (block && block.seats) {
-                const seats = Array.isArray(block.seats) ? block.seats : Object.values(block.seats);
-                seats.forEach(s => { if (s) s.occupied = false; });
-                block.seats = seats;
-                syncToFirebase();
-            }
-        }
-
-        function toggleSeat(blockCode, seatIndex) {
-            if (isLocked) return;
-            const blocks = getBlocksArray();
-            const block = blocks.find(b => b && b.code === blockCode);
-            if (block && block.seats) {
-                const seats = Array.isArray(block.seats) ? block.seats : Object.values(block.seats);
-                if (seats[seatIndex]) {
-                    seats[seatIndex].occupied = !seats[seatIndex].occupied;
-                    block.seats = seats;
-                    syncToFirebase();
-                }
-            }
-        }
-
-        function mintaSandi(grup, callback) {
-            if (grup === 'TAMBAH_HAPUS') {
-                targetSandi = SANDI_TAMBAH_HAPUS;
-            } else if (grup === 'PENUH_KOSONG') {
-                targetSandi = SANDI_PENUH_KOSONG;
-            }
-            aksiTertunda = callback;
-            inputSandi = "";
-            updatePinDisplay();
-            document.getElementById('pinModal').classList.add('active');
-        }
-
-        function tekanAngka(digit) {
-            if (inputSandi.length < 8) {
-                inputSandi += digit;
-                updatePinDisplay();
-            }
-        }
-
-        function hapusAngka() {
-            inputSandi = inputSandi.slice(0, -1);
-            updatePinDisplay();
-        }
-
-        function updatePinDisplay() {
-            document.getElementById('pinDisplay').innerText = "•".repeat(inputSandi.length);
-        }
-
-        function batalPin() {
-            inputSandi = "";
-            aksiTertunda = null;
-            document.getElementById('pinModal').classList.remove('active');
-        }
-
-        function verifikasiPin() {
-            if (inputSandi === targetSandi) {
-                const eksekusiAksi = aksiTertunda;
-                batalPin();
-                if (typeof eksekusiAksi === 'function') {
-                    eksekusiAksi();
-                }
-            } else {
-                alert("Sandi PIN Salah!");
-                inputSandi = "";
-                updatePinDisplay();
-            }
-        }
-    </script>
 </body>
 </html>
