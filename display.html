@@ -10,7 +10,7 @@
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #121212; color: white; padding: 15px; margin: 0; }
-        h1 { text-align: center; margin: 5px 0 15px 0; font-size: 1.6rem; letter-spacing: 1px; }
+        h1 { text-align: center; margin: 5px 0 15px 0; font-size: 1.6rem; letter-spacing: 1px; color: #38bdf8; }
         
         .table-container { width: 100%; max-width: 95%; margin: 0 auto 20px auto; }
         .summary-table { width: 100%; border-collapse: collapse; background: #1e1e1e; border-radius: 8px; overflow: hidden; }
@@ -21,7 +21,6 @@
         .text-kosong { color: #81c784; font-weight: bold; }
         .text-terisi { color: #e57373; font-weight: bold; }
 
-        /* Container blok agar bisa berjajar fleksibel ke samping */
         .block-container { 
             display: flex; 
             flex-wrap: wrap; 
@@ -31,19 +30,17 @@
             width: 100%;
         }
 
-        /* Card Blok Ringkas */
         .block-card { 
             background: #1e1e1e; 
             padding: 10px 12px; 
             border-radius: 8px; 
             border: 1px solid #333; 
-            flex: 1 1 200px; /* Otomatis melebar & berjajar */
+            flex: 1 1 200px;
             max-width: 400px;
             min-width: 180px;
         }
         .block-card h3 { margin: 0 0 8px 0; border-bottom: 1px solid #444; padding-bottom: 5px; text-align: center; color: #ffca28; font-size: 1rem; }
         
-        /* Grid Kursi Ringkas */
         .grid { display: grid; gap: 4px; margin-top: 5px; }
         .seat { 
             height: 26px; 
@@ -154,8 +151,6 @@
                     if (!seat) return;
                     const seatEl = document.createElement('div');
                     seatEl.className = `seat ${seat.occupied ? 'occupied' : 'vacant'}`;
-                    
-                    // Format baru ringkas: Baris,Kolom (contoh: 1,6)
                     seatEl.innerText = `${seat.r},${seat.c}`;
                     grid.appendChild(seatEl);
                 });
