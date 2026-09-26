@@ -41,6 +41,13 @@
         
         button, input, select { touch-action: manipulation; }
 
+        /* DISABLED STATE STYLING */
+        button:disabled, select:disabled, input:disabled {
+            opacity: 0.5 !important;
+            cursor: not-allowed !important;
+            pointer-events: none !important;
+        }
+
         /* TAB NAVIGATION */
         .tab-menu { display: flex; gap: 5px; margin-bottom: 15px; border-bottom: 2px solid #ccc; }
         .tab-btn { flex: 1; padding: 12px 5px; background: #e0e0e0; border: none; border-radius: 6px 6px 0 0; font-weight: bold; font-size: 0.85rem; cursor: pointer; color: #555; text-align: center; }
@@ -57,7 +64,6 @@
         .input-item { display: flex; flex-direction: column; gap: 5px; }
         .input-item input, .select-block { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.9rem; }
         .select-block { width: 100%; font-weight: bold; background: #fff; margin-bottom: 15px; }
-        .select-block:disabled { background: #e9ecef; cursor: not-allowed; }
         .btn-add { padding: 10px 18px; background-color: #2196F3; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
         
         /* SUMMARY TABLE */
@@ -78,8 +84,8 @@
         .btn-full { background-color: #e53935; } 
         .btn-empty { background-color: #43a047; } 
         .btn-delete { background-color: #757575; } 
-        .btn-lock { background: #e0e0e0; border: 1px solid #ccc; font-size: 0.9rem; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
-        .btn-action:hover:not(:disabled) { opacity: 0.85; }
+        .btn-lock { background: #e0e0e0; border: 1px solid #ccc; font-size: 0.9rem; padding: 4px 8px; border-radius: 4px; cursor: pointer; pointer-events: auto !important; opacity: 1 !important; }
+        .btn-action:hover { opacity: 0.85; }
 
         /* SEAT GRID */
         .grid { display: grid; gap: 6px; margin-top: 10px; }
@@ -170,7 +176,7 @@
                     <label for="blockCols">Kolom:</label>
                     <input type="number" id="blockCols" min="1" value="6" style="width: 60px;">
                 </div>
-                <button class="btn-add" onclick="mintaSandi('TAMBAH_HAPUS', tambahBlok)">Tambah</button>
+                <button id="btnAddBlock" class="btn-add" onclick="mintaSandi('TAMBAH_HAPUS', tambahBlok)">Tambah</button>
             </div>
         </div>
 
@@ -313,7 +319,7 @@
         const db = firebase.database().ref('seminar_seats');
 
         let state = { blocks: [] };
-        let selectedBlockCode = null; // Default null agar petugas memilih sendiri
+        let selectedBlockCode = null;
         let isLocked = false; 
         let blockYangAkanDihapus = null;
 
@@ -368,7 +374,7 @@
                 // Jika sedang terkunci, minta PIN "0" untuk membuka kembali
                 mintaSandi('ISI_BLOK', () => {
                     isLocked = false;
-                    renderIsiHadirin();
+                    renderAll();
                 });
             }
         }
@@ -380,7 +386,7 @@
         function eksekusiKunci() {
             isLocked = true;
             document.getElementById('modalConfirmLock').classList.remove('active');
-            renderIsiHadirin();
+            renderAll();
         }
 
         function onSelectBlockChange(val) {
@@ -392,6 +398,10 @@
             updateDropdownOptions();
             renderIsiHadirin();
             renderRekapitulasi();
+
+            // Atur status tombol Tambah di Tab Tambah & Rekap
+            const btnAddBlock = document.getElementById('btnAddBlock');
+            if (btnAddBlock) btnAddBlock.disabled = isLocked;
         }
 
         function updateDropdownOptions() {
@@ -401,9 +411,11 @@
             const currentVal = selectedBlockCode;
             blockSelect.innerHTML = '<option value="">-- Pilih Blok Kursi --</option>';
 
+            // Kunci/Non-aktifkan dropdown jika isLocked === true
+            blockSelect.disabled = isLocked;
+
             if (blocks.length === 0) {
                 selectedBlockCode = null;
-                blockSelect.disabled = isLocked;
                 return;
             }
 
@@ -415,28 +427,23 @@
                 blockSelect.appendChild(opt);
             });
 
-            // Pertahankan nilai jika pengguna sudah memilih blok sebelumnya
             if (currentVal && blocks.some(b => b && b.code === currentVal)) {
                 blockSelect.value = currentVal;
+                selectedBlockCode = currentVal;
             } else {
-                blockSelect.value = "";
+                // Jangan pilih blok otomatis saat aplikasi baru berjalan
                 selectedBlockCode = null;
+                blockSelect.value = "";
             }
-
-            // Non-aktifkan dropdown jika dalam posisi terkunci
-            blockSelect.disabled = isLocked;
         }
 
         function renderIsiHadirin() {
-            const blockSelect = document.getElementById('blockSelect');
-            if (blockSelect) blockSelect.disabled = isLocked;
-
             const wrapper = document.getElementById('isiBlockWrapper');
             wrapper.innerHTML = '';
 
             const blocks = getBlocksArray();
             if (blocks.length === 0 || !selectedBlockCode) {
-                wrapper.innerHTML = '<div class="card"><p style="text-align:center; color:#777;">Silakan pilih blok kursi terlebih dahulu pada menu drop down di atas.</p></div>';
+                wrapper.innerHTML = '<div class="card"><p style="text-align:center; color:#777;">Silakan pilih blok kursi terlebih dahulu.</p></div>';
                 return;
             }
 
@@ -454,16 +461,12 @@
 
             const header = document.createElement('div');
             header.className = 'block-header';
-            
-            // Atribut disabled untuk tombol tindakan jika blok dalam posisi terkunci
-            const disabledAttr = isLocked ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : '';
-
             header.innerHTML = `
                 <h3>Blok ${block.code} (${block.rows}x${block.cols}) - Terisi: ${terisiCount}</h3>
                 <div class="btn-group">
-                    <button class="btn-action btn-full" ${disabledAttr} onclick="mintaSandi('PENUH_KOSONG', () => setBlockFull('${block.code}'))">Penuh</button>
-                    <button class="btn-action btn-empty" ${disabledAttr} onclick="mintaSandi('PENUH_KOSONG', () => setBlockEmpty('${block.code}'))">Kosong</button>
-                    <button class="btn-action btn-delete" ${disabledAttr} onclick="mintaSandi('TAMBAH_HAPUS', () => hapusBlok('${block.code}'))">Hapus</button>
+                    <button class="btn-action btn-full" ${isLocked ? 'disabled' : ''} onclick="mintaSandi('PENUH_KOSONG', () => setBlockFull('${block.code}'))">Penuh</button>
+                    <button class="btn-action btn-empty" ${isLocked ? 'disabled' : ''} onclick="mintaSandi('PENUH_KOSONG', () => setBlockEmpty('${block.code}'))">Kosong</button>
+                    <button class="btn-action btn-delete" ${isLocked ? 'disabled' : ''} onclick="mintaSandi('TAMBAH_HAPUS', () => hapusBlok('${block.code}'))">Hapus</button>
                     <button class="btn-lock" onclick="toggleLock()" title="${isLocked ? 'Buka Kunci untuk Mengisi' : 'Kunci Pengisian'}">
                         ${isLocked ? '🔒' : '🔓'}
                     </button>
@@ -483,6 +486,7 @@
                 if (isLocked) {
                     btn.className = `seat-btn ${seat.occupied ? 'occupied-locked' : 'vacant-locked'}`;
                     btn.onclick = null;
+                    btn.disabled = true;
                 } else {
                     btn.className = `seat-btn ${seat.occupied ? 'occupied' : 'vacant'}`;
                     btn.onclick = () => toggleSeat(block.code, idx);
@@ -545,6 +549,8 @@
         }
 
         function tambahBlok() {
+            if (isLocked) return;
+
             const codeInput = document.getElementById('blockCode');
             const rowsInput = document.getElementById('blockRows');
             const colsInput = document.getElementById('blockCols');
@@ -576,6 +582,7 @@
         }
 
         function hapusBlok(blockCode) {
+            if (isLocked) return;
             blockYangAkanDihapus = blockCode;
             document.getElementById('modalBlockCode').innerText = blockCode;
             document.getElementById('modalConfirm').classList.add('active');
@@ -599,6 +606,7 @@
         }
 
         function setBlockFull(blockCode) {
+            if (isLocked) return;
             const blocks = getBlocksArray();
             const block = blocks.find(b => b && b.code === blockCode);
             if (block && block.seats) {
@@ -610,6 +618,7 @@
         }
 
         function setBlockEmpty(blockCode) {
+            if (isLocked) return;
             const blocks = getBlocksArray();
             const block = blocks.find(b => b && b.code === blockCode);
             if (block && block.seats) {
