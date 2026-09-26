@@ -35,13 +35,13 @@
             padding: 10px 12px; 
             border-radius: 8px; 
             border: 1px solid #333; 
-            flex: 1 1 200px;
-            max-width: 400px;
-            min-width: 180px;
+            flex: 1 1 auto;
+            max-width: 100%;
+            box-sizing: border-box;
         }
         .block-card h3 { margin: 0 0 8px 0; border-bottom: 1px solid #444; padding-bottom: 5px; text-align: center; color: #ffca28; font-size: 1rem; }
         
-        .grid { display: grid; gap: 4px; margin-top: 5px; }
+        .grid { display: grid; gap: 4px; margin-top: 5px; width: 100%; }
         .seat { 
             height: 26px; 
             display: flex; 
@@ -49,8 +49,9 @@
             justify-content: center; 
             border-radius: 3px; 
             font-weight: bold; 
-            font-size: 0.7rem; 
-            padding: 0 2px; 
+            padding: 0 1px; 
+            white-space: nowrap;
+            overflow: hidden;
         }
         .vacant { background-color: #2e7d32; color: white; }
         .occupied { background-color: #c62828; color: white; }
@@ -130,7 +131,7 @@
                 grandTotalKosong += kosong;
                 grandTotalTerisi += terisi;
 
-                // Cek status kunci blok (Terkunci = ✅, Terbuka/Edit = ✏️)
+                // Status Icon (Terkunci = ✅, Terbuka = ✏️)
                 const statusIcon = block.isLocked ? '✅' : '✏️';
 
                 const tr = document.createElement('tr');
@@ -144,16 +145,31 @@
 
                 const card = document.createElement('div');
                 card.className = 'block-card';
+
+                // Hitung lebar minimum dinamis berdasarkan jumlah kolom
+                const cols = parseInt(block.cols) || 1;
+                const minWidth = Math.max(200, cols * 28 + 24); 
+                card.style.minWidth = `${minWidth}px`;
+
                 card.innerHTML = `<h3>BLOK ${block.code} ${statusIcon}</h3>`;
 
                 const grid = document.createElement('div');
                 grid.className = 'grid';
-                grid.style.gridTemplateColumns = `repeat(${block.cols}, 1fr)`;
+                grid.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
+
+                // Penyesuaian ukuran font otomatis jika kolom banyak
+                let fontSize = '0.7rem';
+                if (cols >= 10) {
+                    fontSize = '0.55rem';
+                } else if (cols >= 7) {
+                    fontSize = '0.62rem';
+                }
 
                 seats.forEach(seat => {
                     if (!seat) return;
                     const seatEl = document.createElement('div');
                     seatEl.className = `seat ${seat.occupied ? 'occupied' : 'vacant'}`;
+                    seatEl.style.fontSize = fontSize;
                     seatEl.innerText = `${seat.r},${seat.c}`;
                     grid.appendChild(seatEl);
                 });
