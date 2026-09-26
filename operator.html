@@ -227,6 +227,18 @@
         </div>
     </div>
 
+    <!-- MODAL KONFIRMASI SELESAI HITUNG -->
+    <div class="modal-overlay" id="modalConfirmLock">
+        <div class="modal-box">
+            <h4>Konfirmasi Selesai</h4>
+            <p>Apakah penghitungan sudah selesai?</p>
+            <div class="modal-actions">
+                <button class="btn-modal-cancel" onclick="batalKunci()">Batal</button>
+                <button class="btn-modal-confirm" style="background-color: #2196F3;" onclick="eksekusiKunci()">Selesai</button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL PETUNJUK iOS (SAFARI) -->
     <div class="modal-overlay" id="iosModal">
         <div class="modal-box">
@@ -273,7 +285,6 @@
             const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
             if (deferredPrompt) {
-                // Browser Android / Chrome mendukung dialog instalasi langsung
                 deferredPrompt.prompt();
                 deferredPrompt.userChoice.then((choiceResult) => {
                     if (choiceResult.outcome === 'accepted') {
@@ -282,10 +293,8 @@
                     deferredPrompt = null;
                 });
             } else if (isIOS) {
-                // Tampilkan petunjuk manual untuk iOS Safari
                 document.getElementById('iosModal').classList.add('active');
             } else {
-                // Browser desktop atau browser yang sudah terinstall
                 alert("Untuk membuat shortcut di Layar Utama:\n\n1. Buka menu browser (titik tiga di kanan atas).\n2. Pilih 'Tambahkan ke Layar Utama' (Add to Home Screen).");
             }
         }
@@ -310,6 +319,7 @@
         // SANDI PIN AKSES
         const SANDI_TAMBAH_HAPUS = "1234";
         const SANDI_PENUH_KOSONG = "5678";
+        const SANDI_ISI_BLOK = "0";
 
         let targetSandi = "";
         let inputSandi = "";
@@ -350,7 +360,25 @@
         }
 
         function toggleLock() {
-            isLocked = !isLocked;
+            if (!isLocked) {
+                // Tampilkan konfirmasi penghitungan selesai
+                document.getElementById('modalConfirmLock').classList.add('active');
+            } else {
+                // Jika sedang terkunci, minta PIN "0" untuk membuka kembali
+                mintaSandi('ISI_BLOK', () => {
+                    isLocked = false;
+                    renderIsiHadirin();
+                });
+            }
+        }
+
+        function batalKunci() {
+            document.getElementById('modalConfirmLock').classList.remove('active');
+        }
+
+        function eksekusiKunci() {
+            isLocked = true;
+            document.getElementById('modalConfirmLock').classList.remove('active');
             renderIsiHadirin();
         }
 
@@ -600,6 +628,8 @@
                 targetSandi = SANDI_TAMBAH_HAPUS;
             } else if (grup === 'PENUH_KOSONG') {
                 targetSandi = SANDI_PENUH_KOSONG;
+            } else if (grup === 'ISI_BLOK') {
+                targetSandi = SANDI_ISI_BLOK;
             }
             aksiTertunda = callback;
             inputSandi = "";
