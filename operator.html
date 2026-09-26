@@ -57,6 +57,7 @@
         .input-item { display: flex; flex-direction: column; gap: 5px; }
         .input-item input, .select-block { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.9rem; }
         .select-block { width: 100%; font-weight: bold; background: #fff; margin-bottom: 15px; }
+        .select-block:disabled { background: #e9ecef; cursor: not-allowed; }
         .btn-add { padding: 10px 18px; background-color: #2196F3; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
         
         /* SUMMARY TABLE */
@@ -78,14 +79,7 @@
         .btn-empty { background-color: #43a047; } 
         .btn-delete { background-color: #757575; } 
         .btn-lock { background: #e0e0e0; border: 1px solid #ccc; font-size: 0.9rem; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
-        .btn-action:hover { opacity: 0.85; }
-        
-        /* DISABLED STATE UNTUK TOMBOL AKSI */
-        .btn-action:disabled {
-            opacity: 0.4;
-            cursor: not-allowed;
-            pointer-events: none;
-        }
+        .btn-action:hover:not(:disabled) { opacity: 0.85; }
 
         /* SEAT GRID */
         .grid { display: grid; gap: 6px; margin-top: 10px; }
@@ -319,7 +313,7 @@
         const db = firebase.database().ref('seminar_seats');
 
         let state = { blocks: [] };
-        let selectedBlockCode = null;
+        let selectedBlockCode = null; // Default null agar petugas memilih sendiri
         let isLocked = false; 
         let blockYangAkanDihapus = null;
 
@@ -390,7 +384,7 @@
         }
 
         function onSelectBlockChange(val) {
-            selectedBlockCode = val || null;
+            selectedBlockCode = val ? val : null;
             renderIsiHadirin();
         }
 
@@ -409,6 +403,7 @@
 
             if (blocks.length === 0) {
                 selectedBlockCode = null;
+                blockSelect.disabled = isLocked;
                 return;
             }
 
@@ -420,23 +415,28 @@
                 blockSelect.appendChild(opt);
             });
 
-            // Hanya pilih blok jika sebelumnya sudah dipilih oleh petugas
+            // Pertahankan nilai jika pengguna sudah memilih blok sebelumnya
             if (currentVal && blocks.some(b => b && b.code === currentVal)) {
                 blockSelect.value = currentVal;
-                selectedBlockCode = currentVal;
             } else {
-                selectedBlockCode = null;
                 blockSelect.value = "";
+                selectedBlockCode = null;
             }
+
+            // Non-aktifkan dropdown jika dalam posisi terkunci
+            blockSelect.disabled = isLocked;
         }
 
         function renderIsiHadirin() {
+            const blockSelect = document.getElementById('blockSelect');
+            if (blockSelect) blockSelect.disabled = isLocked;
+
             const wrapper = document.getElementById('isiBlockWrapper');
             wrapper.innerHTML = '';
 
             const blocks = getBlocksArray();
             if (blocks.length === 0 || !selectedBlockCode) {
-                wrapper.innerHTML = '<div class="card"><p style="text-align:center; color:#777;">Silakan pilih blok kursi terlebih dahulu.</p></div>';
+                wrapper.innerHTML = '<div class="card"><p style="text-align:center; color:#777;">Silakan pilih blok kursi terlebih dahulu pada menu drop down di atas.</p></div>';
                 return;
             }
 
@@ -455,8 +455,8 @@
             const header = document.createElement('div');
             header.className = 'block-header';
             
-            // Atribut disabled untuk tombol jika posisi terkunci
-            const disabledAttr = isLocked ? 'disabled' : '';
+            // Atribut disabled untuk tombol tindakan jika blok dalam posisi terkunci
+            const disabledAttr = isLocked ? 'disabled style="opacity: 0.5; cursor: not-allowed;"' : '';
 
             header.innerHTML = `
                 <h3>Blok ${block.code} (${block.rows}x${block.cols}) - Terisi: ${terisiCount}</h3>
