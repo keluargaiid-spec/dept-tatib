@@ -79,6 +79,13 @@
         .btn-delete { background-color: #757575; } 
         .btn-lock { background: #e0e0e0; border: 1px solid #ccc; font-size: 0.9rem; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
         .btn-action:hover { opacity: 0.85; }
+        
+        /* DISABLED STATE UNTUK TOMBOL AKSI */
+        .btn-action:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
 
         /* SEAT GRID */
         .grid { display: grid; gap: 6px; margin-top: 10px; }
@@ -383,7 +390,7 @@
         }
 
         function onSelectBlockChange(val) {
-            selectedBlockCode = val;
+            selectedBlockCode = val || null;
             renderIsiHadirin();
         }
 
@@ -398,10 +405,9 @@
             const blocks = getBlocksArray();
 
             const currentVal = selectedBlockCode;
-            blockSelect.innerHTML = '';
+            blockSelect.innerHTML = '<option value="">-- Pilih Blok Kursi --</option>';
 
             if (blocks.length === 0) {
-                blockSelect.innerHTML = '<option value="">-- Belum Ada Blok --</option>';
                 selectedBlockCode = null;
                 return;
             }
@@ -414,12 +420,13 @@
                 blockSelect.appendChild(opt);
             });
 
+            // Hanya pilih blok jika sebelumnya sudah dipilih oleh petugas
             if (currentVal && blocks.some(b => b && b.code === currentVal)) {
                 blockSelect.value = currentVal;
                 selectedBlockCode = currentVal;
             } else {
-                selectedBlockCode = blocks[0] ? blocks[0].code : null;
-                if (selectedBlockCode) blockSelect.value = selectedBlockCode;
+                selectedBlockCode = null;
+                blockSelect.value = "";
             }
         }
 
@@ -429,7 +436,7 @@
 
             const blocks = getBlocksArray();
             if (blocks.length === 0 || !selectedBlockCode) {
-                wrapper.innerHTML = '<div class="card"><p style="text-align:center; color:#777;">Tidak ada blok dipilih atau data kosong.</p></div>';
+                wrapper.innerHTML = '<div class="card"><p style="text-align:center; color:#777;">Silakan pilih blok kursi terlebih dahulu.</p></div>';
                 return;
             }
 
@@ -447,12 +454,16 @@
 
             const header = document.createElement('div');
             header.className = 'block-header';
+            
+            // Atribut disabled untuk tombol jika posisi terkunci
+            const disabledAttr = isLocked ? 'disabled' : '';
+
             header.innerHTML = `
                 <h3>Blok ${block.code} (${block.rows}x${block.cols}) - Terisi: ${terisiCount}</h3>
                 <div class="btn-group">
-                    <button class="btn-action btn-full" onclick="mintaSandi('PENUH_KOSONG', () => setBlockFull('${block.code}'))">Penuh</button>
-                    <button class="btn-action btn-empty" onclick="mintaSandi('PENUH_KOSONG', () => setBlockEmpty('${block.code}'))">Kosong</button>
-                    <button class="btn-action btn-delete" onclick="mintaSandi('TAMBAH_HAPUS', () => hapusBlok('${block.code}'))">Hapus</button>
+                    <button class="btn-action btn-full" ${disabledAttr} onclick="mintaSandi('PENUH_KOSONG', () => setBlockFull('${block.code}'))">Penuh</button>
+                    <button class="btn-action btn-empty" ${disabledAttr} onclick="mintaSandi('PENUH_KOSONG', () => setBlockEmpty('${block.code}'))">Kosong</button>
+                    <button class="btn-action btn-delete" ${disabledAttr} onclick="mintaSandi('TAMBAH_HAPUS', () => hapusBlok('${block.code}'))">Hapus</button>
                     <button class="btn-lock" onclick="toggleLock()" title="${isLocked ? 'Buka Kunci untuk Mengisi' : 'Kunci Pengisian'}">
                         ${isLocked ? '🔒' : '🔓'}
                     </button>
