@@ -139,7 +139,6 @@
 
     <div class="header-container">
         <h2>PANEL TATIB - MONITORING KURSI</h2>
-        <!-- TOMBOL SHORTCUT UTAMA MOBILE -->
         <button id="btnShortcut" class="btn-shortcut" onclick="tambahShortcut()">
             📱 Buat Shortcut di Utama
         </button>
@@ -238,7 +237,7 @@
     <div class="modal-overlay" id="modalConfirmLock">
         <div class="modal-box">
             <h4>Konfirmasi Selesai</h4>
-            <p>Apakah penghitungan sudah selesai?</p>
+            <p>Apakah penghitungan untuk blok ini sudah selesai?</p>
             <div class="modal-actions">
                 <button class="btn-modal-cancel" onclick="batalKunci()">Batal</button>
                 <button class="btn-modal-confirm" style="background-color: #2196F3;" onclick="eksekusiKunci()">Selesai</button>
@@ -260,7 +259,7 @@
     </div>
 
     <script>
-        // --- 1. DYNAMIC MANIFEST FOR MOBILE SHORTCUT ---
+        // MANIFEST PWA SHORTCUT
         const manifestData = {
             "name": "Panel Tatib Monitoring",
             "short_name": "Panel Tatib",
@@ -280,9 +279,7 @@
         linkManifest.href = URL.createObjectURL(manifestBlob);
         document.head.appendChild(linkManifest);
 
-        // --- 2. LOGIC TOMBOL SHORTCUT HOME SCREEN ---
         let deferredPrompt = null;
-
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
@@ -290,13 +287,9 @@
 
         function tambahShortcut() {
             const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-
             if (deferredPrompt) {
                 deferredPrompt.prompt();
                 deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('Pengguna menambahkan shortcut ke layar utama');
-                    }
                     deferredPrompt = null;
                 });
             } else if (isIOS) {
@@ -310,7 +303,7 @@
             document.getElementById('iosModal').classList.remove('active');
         }
 
-        // --- 3. FIREBASE CONFIGURATION ---
+        // FIREBASE SETUP
         const firebaseConfig = {
             databaseURL: "https://monitoring-tatib-default-rtdb.asia-southeast1.firebasedatabase.app"
         };
@@ -320,10 +313,10 @@
 
         let state = { blocks: [] };
         let selectedBlockCode = null;
-        let isLocked = false; 
+        let blockToLockCode = null;
         let blockYangAkanDihapus = null;
 
-        // SANDI PIN AKSES
+        // PIN AKSES
         const SANDI_TAMBAH_HAPUS = "1234";
         const SANDI_PENUH_KOSONG = "5678";
         const SANDI_ISI_BLOK = "0";
@@ -366,27 +359,37 @@
             document.getElementById(`btn-tab-${tabName}`).classList.add('active');
         }
 
-        function toggleLock() {
-            if (!isLocked) {
-                // Tampilkan konfirmasi penghitungan selesai
+        function toggleLock(blockCode) {
+            const blocks = getBlocksArray();
+            const block = blocks.find(b => b && b.code === blockCode);
+            if (!block) return;
+
+            if (!block.isLocked) {
+                blockToLockCode = blockCode;
                 document.getElementById('modalConfirmLock').classList.add('active');
             } else {
-                // Jika sedang terkunci, minta PIN "0" untuk membuka kembali
                 mintaSandi('ISI_BLOK', () => {
-                    isLocked = false;
-                    renderAll();
+                    block.isLocked = false;
+                    syncToFirebase();
                 });
             }
         }
 
         function batalKunci() {
+            blockToLockCode = null;
             document.getElementById('modalConfirmLock').classList.remove('active');
         }
 
         function eksekusiKunci() {
-            isLocked = true;
-            document.getElementById('modalConfirmLock').classList.remove('active');
-            renderAll();
+            if (blockToLockCode) {
+                const blocks = getBlocksArray();
+                const block = blocks.find(b => b && b.code === blockToLockCode);
+                if (block) {
+                    block.isLocked = true;
+                    syncToFirebase();
+                }
+            }
+            batalKunci();
         }
 
         function onSelectBlockChange(val) {
@@ -398,10 +401,6 @@
             updateDropdownOptions();
             renderIsiHadirin();
             renderRekapitulasi();
-
-            // Atur status tombol Tambah di Tab Tambah & Rekap
-            const btnAddBlock = document.getElementById('btnAddBlock');
-            if (btnAddBlock) btnAddBlock.disabled = isLocked;
         }
 
         function updateDropdownOptions() {
@@ -410,9 +409,6 @@
 
             const currentVal = selectedBlockCode;
             blockSelect.innerHTML = '<option value="">-- Pilih Blok Kursi --</option>';
-
-            // Kunci/Non-aktifkan dropdown jika isLocked === true
-            blockSelect.disabled = isLocked;
 
             if (blocks.length === 0) {
                 selectedBlockCode = null;
@@ -423,7 +419,7 @@
                 if (!b) return;
                 const opt = document.createElement('option');
                 opt.value = b.code;
-                opt.textContent = `Blok ${b.code} (${b.rows}x${b.cols})`;
+                opt.textContent = `Blok ${b.code} (${b.rows}x${b.cols}) ${b.isLocked ? '🔒' : ''}`;
                 blockSelect.appendChild(opt);
             });
 
@@ -431,7 +427,6 @@
                 blockSelect.value = currentVal;
                 selectedBlockCode = currentVal;
             } else {
-                // Jangan pilih blok otomatis saat aplikasi baru berjalan
                 selectedBlockCode = null;
                 blockSelect.value = "";
             }
@@ -450,6 +445,7 @@
             const block = blocks.find(b => b && b.code === selectedBlockCode);
             if (!block) return;
 
+            const isLocked = Boolean(block.isLocked);
             const seats = block.seats 
                 ? (Array.isArray(block.seats) ? block.seats : Object.values(block.seats))
                 : [];
@@ -467,7 +463,7 @@
                     <button class="btn-action btn-full" ${isLocked ? 'disabled' : ''} onclick="mintaSandi('PENUH_KOSONG', () => setBlockFull('${block.code}'))">Penuh</button>
                     <button class="btn-action btn-empty" ${isLocked ? 'disabled' : ''} onclick="mintaSandi('PENUH_KOSONG', () => setBlockEmpty('${block.code}'))">Kosong</button>
                     <button class="btn-action btn-delete" ${isLocked ? 'disabled' : ''} onclick="mintaSandi('TAMBAH_HAPUS', () => hapusBlok('${block.code}'))">Hapus</button>
-                    <button class="btn-lock" onclick="toggleLock()" title="${isLocked ? 'Buka Kunci untuk Mengisi' : 'Kunci Pengisian'}">
+                    <button class="btn-lock" onclick="toggleLock('${block.code}')" title="${isLocked ? 'Buka Kunci untuk Mengisi' : 'Kunci Pengisian'}">
                         ${isLocked ? '🔒' : '🔓'}
                     </button>
                 </div>
@@ -528,9 +524,12 @@
                 grandKosong += kosong;
                 grandTerisi += terisi;
 
+                // Status Icon: terkunci = ✅, terbuka = ✏️
+                const statusIcon = block.isLocked ? '✅' : '✏️';
+
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td><b>Blok ${block.code}</b></td>
+                    <td><b>Blok ${block.code}</b> ${statusIcon}</td>
                     <td>${total}</td>
                     <td class="text-kosong">${kosong}</td>
                     <td class="text-terisi">${terisi}</td>
@@ -549,8 +548,6 @@
         }
 
         function tambahBlok() {
-            if (isLocked) return;
-
             const codeInput = document.getElementById('blockCode');
             const rowsInput = document.getElementById('blockRows');
             const colsInput = document.getElementById('blockCols');
@@ -572,7 +569,8 @@
                 }
             }
 
-            blocks.push({ code, rows, cols, seats });
+            // blok baru dibuat dengan status isLocked: false (icon ✏️ Edit)
+            blocks.push({ code, rows, cols, seats, isLocked: false });
             state.blocks = blocks;
             
             codeInput.value = '';
@@ -582,7 +580,6 @@
         }
 
         function hapusBlok(blockCode) {
-            if (isLocked) return;
             blockYangAkanDihapus = blockCode;
             document.getElementById('modalBlockCode').innerText = blockCode;
             document.getElementById('modalConfirm').classList.add('active');
@@ -606,10 +603,9 @@
         }
 
         function setBlockFull(blockCode) {
-            if (isLocked) return;
             const blocks = getBlocksArray();
             const block = blocks.find(b => b && b.code === blockCode);
-            if (block && block.seats) {
+            if (block && !block.isLocked && block.seats) {
                 const seats = Array.isArray(block.seats) ? block.seats : Object.values(block.seats);
                 seats.forEach(s => { if (s) s.occupied = true; });
                 block.seats = seats;
@@ -618,10 +614,9 @@
         }
 
         function setBlockEmpty(blockCode) {
-            if (isLocked) return;
             const blocks = getBlocksArray();
             const block = blocks.find(b => b && b.code === blockCode);
-            if (block && block.seats) {
+            if (block && !block.isLocked && block.seats) {
                 const seats = Array.isArray(block.seats) ? block.seats : Object.values(block.seats);
                 seats.forEach(s => { if (s) s.occupied = false; });
                 block.seats = seats;
@@ -630,10 +625,9 @@
         }
 
         function toggleSeat(blockCode, seatIndex) {
-            if (isLocked) return;
             const blocks = getBlocksArray();
             const block = blocks.find(b => b && b.code === blockCode);
-            if (block && block.seats) {
+            if (block && !block.isLocked && block.seats) {
                 const seats = Array.isArray(block.seats) ? block.seats : Object.values(block.seats);
                 if (seats[seatIndex]) {
                     seats[seatIndex].occupied = !seats[seatIndex].occupied;
