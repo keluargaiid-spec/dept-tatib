@@ -130,9 +130,12 @@
                 grandTotalKosong += kosong;
                 grandTotalTerisi += terisi;
 
+                // Cek status kunci blok (Terkunci = ✅, Terbuka/Edit = ✏️)
+                const statusIcon = block.isLocked ? '✅' : '✏️';
+
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
-                    <td><b>Blok ${block.code}</b></td>
+                    <td><b>Blok ${block.code}</b> ${statusIcon}</td>
                     <td>${totalKursi}</td>
                     <td class="text-kosong">${kosong}</td>
                     <td class="text-terisi">${terisi}</td>
@@ -141,7 +144,7 @@
 
                 const card = document.createElement('div');
                 card.className = 'block-card';
-                card.innerHTML = `<h3>BLOK ${block.code}</h3>`;
+                card.innerHTML = `<h3>BLOK ${block.code} ${statusIcon}</h3>`;
 
                 const grid = document.createElement('div');
                 grid.className = 'grid';
