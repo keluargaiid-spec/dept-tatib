@@ -155,6 +155,115 @@
         .key-btn.btn-action-key { border-radius: 8px; font-size: 0.85rem; }
         .key-btn.btn-confirm-key { background: #4caf50; color: white; border: none; }
         .key-btn.btn-delete-key { background: #ff9800; color: white; border: none; }
+
+        /* TALLY COUNTER CLICKER STYLES (HADIRIN LAIN) */
+        .counter-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 15px 5px;
+        }
+        .tally-counter-card {
+            width: 250px;
+            height: 270px;
+            background: linear-gradient(145deg, #e6e6e6, #b0b0b0);
+            border: 3px solid #555;
+            border-radius: 28px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3), inset 0 2px 4px rgba(255,255,255,0.8);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            user-select: none;
+        }
+        .btn-counter-reset {
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            width: 22px;
+            height: 22px;
+            background: radial-gradient(circle at 35% 35%, #ff5252, #b71c1c);
+            border: 2px solid #800000;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+            outline: none;
+        }
+        .btn-counter-reset:active {
+            transform: scale(0.92);
+        }
+        .counter-display-box {
+            margin-top: 25px;
+            background: #181818;
+            border: 4px solid #333;
+            border-radius: 8px;
+            padding: 8px 12px;
+            width: 190px;
+            text-align: center;
+            box-shadow: inset 0 3px 8px rgba(0,0,0,0.9);
+        }
+        .counter-display-text {
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 2.8rem;
+            font-weight: bold;
+            color: #ffffff;
+            letter-spacing: 6px;
+            line-height: 1;
+        }
+        .counter-controls {
+            margin-top: 25px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 0 5px;
+        }
+        .btn-counter-plus {
+            width: 125px;
+            height: 65px;
+            background: radial-gradient(circle at 50% 30%, #388e3c, #1b5e20);
+            border: 3px solid #0d3b10;
+            border-radius: 35px;
+            color: white;
+            font-size: 2.5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 5px 10px rgba(0,0,0,0.3);
+            touch-action: manipulation;
+            outline: none;
+        }
+        .btn-counter-plus:active {
+            transform: translateY(3px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            background: radial-gradient(circle at 50% 30%, #2e7d32, #1b5e20);
+        }
+        .btn-counter-minus {
+            width: 55px;
+            height: 55px;
+            background: radial-gradient(circle at 35% 35%, #fbc02d, #f57f17);
+            border: 3px solid #a05a00;
+            border-radius: 50%;
+            color: white;
+            font-size: 2rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            touch-action: manipulation;
+            outline: none;
+        }
+        .btn-counter-minus:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            background: radial-gradient(circle at 35% 35%, #f9a825, #e65100);
+        }
     </style>
 </head>
 <body>
@@ -169,6 +278,7 @@
     <!-- TAB MENU -->
     <div class="tab-menu">
         <button class="tab-btn active" id="btn-tab-isi" onclick="switchTab('isi')">Isi Hadirin</button>
+        <button class="tab-btn" id="btn-tab-hadirin-lain" onclick="switchTab('hadirin-lain')">Hadirin Lain</button>
         <button class="tab-btn" id="btn-tab-tambah-rekap" onclick="switchTab('tambah-rekap')">Tambah & Rekap</button>
     </div>
 
@@ -183,7 +293,38 @@
         <div id="isiBlockWrapper"></div>
     </div>
 
-    <!-- TAB 2: TAMBAH & REKAP -->
+    <!-- TAB 2: HADIRIN LAIN -->
+    <div id="tab-hadirin-lain" class="tab-content">
+        <div class="card" style="text-align: center;">
+            <h3>Input Hadirin Lain (Tanpa Kursi)</h3>
+            <p style="font-size: 0.85rem; color: #666; margin-bottom: 15px;">
+                Gunakan alat penghitung di bawah ini untuk menambah atau mengurangi jumlah hadirin lain.
+            </p>
+
+            <div class="counter-wrapper">
+                <div class="tally-counter-card">
+                    <!-- Tombol Merah untuk Reset -->
+                    <button class="btn-counter-reset" onclick="resetHadirinLain()" title="Reset Counter"></button>
+                    
+                    <!-- Layar Tampilan Angka Digital -->
+                    <div class="counter-display-box">
+                        <div class="counter-display-text" id="otherAttendeesDisplay">0000</div>
+                    </div>
+                    
+                    <!-- Tombol Kontrol (+ dan -) -->
+                    <div class="counter-controls">
+                        <!-- Tombol Tambah Hijau -->
+                        <button class="btn-counter-plus" onclick="tambahHadirinLain()">+</button>
+                        
+                        <!-- Tombol Kurang Kuning -->
+                        <button class="btn-counter-minus" onclick="kurangHadirinLain()">-</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 3: TAMBAH & REKAP -->
     <div id="tab-tambah-rekap" class="tab-content">
         <div class="card">
             <h3>+ Tambah Blok Kursi Baru</h3>
@@ -211,13 +352,11 @@
                 <thead>
                     <tr>
                         <th>Blok</th>
-                        <th>Kursi</th>
-                        <th>Kosong</th>
                         <th>Terisi</th>
                     </tr>
                 </thead>
                 <tbody id="opTableBody">
-                    <tr><td colspan="4">Memuat data...</td></tr>
+                    <tr><td colspan="2">Memuat data...</td></tr>
                 </tbody>
                 <tfoot id="opTableFoot"></tfoot>
             </table>
@@ -360,7 +499,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database().ref('seminar_seats');
 
-        let state = { blocks: [] };
+        let state = { blocks: [], otherAttendees: 0 };
         let selectedBlockCode = null;
         let blockToLockCode = null;
         let blockYangAkanDihapus = null;
@@ -380,7 +519,12 @@
 
         db.on('value', (snapshot) => {
             const data = snapshot.val();
-            state = data || { blocks: [] };
+            if (data) {
+                state.blocks = data.blocks || [];
+                state.otherAttendees = data.otherAttendees !== undefined ? parseInt(data.otherAttendees) : 0;
+            } else {
+                state = { blocks: [], otherAttendees: 0 };
+            }
             normalizeBlocksState();
             renderAll();
         }, (err) => {
@@ -479,6 +623,7 @@
         function renderAll() {
             updateDropdownOptions();
             renderIsiHadirin();
+            renderHadirinLain();
             renderRekapitulasi();
         }
 
@@ -588,6 +733,35 @@
             wrapper.appendChild(card);
         }
 
+        /* LOGIK HADIRIN LAIN (CLICKER COUNTER) */
+        function renderHadirinLain() {
+            const displayEl = document.getElementById('otherAttendeesDisplay');
+            if (displayEl) {
+                const val = parseInt(state.otherAttendees) || 0;
+                displayEl.innerText = String(val).padStart(4, '0');
+            }
+        }
+
+        function tambahHadirinLain() {
+            state.otherAttendees = (parseInt(state.otherAttendees) || 0) + 1;
+            syncToFirebase();
+        }
+
+        function kurangHadirinLain() {
+            const current = parseInt(state.otherAttendees) || 0;
+            if (current > 0) {
+                state.otherAttendees = current - 1;
+                syncToFirebase();
+            }
+        }
+
+        function resetHadirinLain() {
+            mintaSandi('TAMBAH_HAPUS', () => {
+                state.otherAttendees = 0;
+                syncToFirebase();
+            });
+        }
+
         function renderRekapitulasi() {
             const opTableBody = document.getElementById('opTableBody');
             const opTableFoot = document.getElementById('opTableFoot');
@@ -596,13 +770,14 @@
             opTableFoot.innerHTML = '';
 
             const blocks = getBlocksArray();
+            const otherAttendees = parseInt(state.otherAttendees) || 0;
 
-            if (blocks.length === 0) {
-                opTableBody.innerHTML = '<tr><td colspan="4">Belum ada blok ditambahkan.</td></tr>';
+            if (blocks.length === 0 && otherAttendees === 0) {
+                opTableBody.innerHTML = '<tr><td colspan="2">Belum ada data ditambahkan.</td></tr>';
                 return;
             }
 
-            let grandTotal = 0, grandKosong = 0, grandTerisi = 0;
+            let grandTerisi = 0;
 
             blocks.forEach(block => {
                 if (!block) return;
@@ -611,12 +786,8 @@
                     : [];
 
                 const validSeats = seats.filter(s => s && s.isSeat !== false);
-                const total = validSeats.length;
                 const terisi = validSeats.filter(s => s.occupied).length;
-                const kosong = total - terisi;
 
-                grandTotal += total;
-                grandKosong += kosong;
                 grandTerisi += terisi;
 
                 const statusIcon = block.isLocked ? '✅' : '✏️';
@@ -624,19 +795,25 @@
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td><b>Blok ${block.code}</b> ${statusIcon}</td>
-                    <td>${total}</td>
-                    <td class="text-kosong">${kosong}</td>
                     <td class="text-terisi">${terisi}</td>
                 `;
                 opTableBody.appendChild(tr);
             });
 
+            // Tambahkan baris Hadirin Lain
+            const trOther = document.createElement('tr');
+            trOther.innerHTML = `
+                <td><b>Hadirin Lain</b></td>
+                <td class="text-terisi">${otherAttendees}</td>
+            `;
+            opTableBody.appendChild(trOther);
+
+            const grandTotalHadirin = grandTerisi + otherAttendees;
+
             opTableFoot.innerHTML = `
                 <tr>
-                    <td>TOTAL</td>
-                    <td>${grandTotal}</td>
-                    <td class="text-kosong">${grandKosong}</td>
-                    <td class="text-terisi">${grandTerisi}</td>
+                    <td>TOTAL HADIRIN</td>
+                    <td class="text-terisi">${grandTotalHadirin}</td>
                 </tr>
             `;
         }
