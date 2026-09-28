@@ -65,6 +65,7 @@
         .input-item input, .select-block { padding: 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 0.9rem; }
         .select-block { width: 100%; font-weight: bold; background: #fff; margin-bottom: 15px; }
         .btn-add { padding: 10px 18px; background-color: #2196F3; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        .btn-custom { padding: 10px 18px; background-color: #10b981; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
         
         /* SUMMARY TABLE */
         .summary-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.85rem; }
@@ -99,6 +100,27 @@
         .vacant-locked { background-color: #d6d6d6 !important; color: #555 !important; cursor: not-allowed; }
         .occupied-locked { background-color: #4a4a4a !important; color: #fff !important; cursor: not-allowed; }
 
+        /* CUSTOM GRID MODAL SEAT STYLES */
+        .custom-seat-btn {
+            height: 38px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.75rem;
+            transition: all 0.15s ease;
+        }
+        .custom-seat-active {
+            background-color: #4CAF50;
+            color: white;
+            border-color: #388E3C;
+        }
+        .custom-seat-inactive {
+            background-color: #ffffff;
+            color: #aaa;
+            border-color: #e0e0e0;
+        }
+
         /* MODAL OVERLAY */
         .modal-overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
@@ -107,11 +129,11 @@
         }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
         .modal-box {
-            background: white; padding: 20px; border-radius: 12px; max-width: 320px; width: 90%; text-align: center;
+            background: white; padding: 20px; border-radius: 12px; max-width: 380px; width: 90%; text-align: center;
             box-shadow: 0 4px 10px rgba(0,0,0,0.3);
         }
         .modal-box h4 { margin-top: 0; color: #333; font-size: 1.1rem; }
-        .modal-box p { color: #555; font-size: 0.9rem; margin-bottom: 20px; line-height: 1.4; }
+        .modal-box p { color: #555; font-size: 0.9rem; margin-bottom: 15px; line-height: 1.4; }
         .modal-actions { display: flex; gap: 10px; justify-content: center; }
         .modal-actions button { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; color: white; width: 100%;}
         .btn-modal-cancel { background: #9e9e9e; }
@@ -179,6 +201,7 @@
                     <input type="number" id="blockCols" min="1" value="6" style="width: 60px;">
                 </div>
                 <button id="btnAddBlock" class="btn-add" onclick="mintaSandi('TAMBAH_HAPUS', tambahBlok)">Tambah</button>
+                <button id="btnAddCustom" class="btn-custom" onclick="mintaSandi('TAMBAH_HAPUS', bukaModalCustom)">Custom</button>
             </div>
         </div>
 
@@ -198,6 +221,29 @@
                 </tbody>
                 <tfoot id="opTableFoot"></tfoot>
             </table>
+        </div>
+    </div>
+
+    <!-- MODAL CUSTOM BLOK -->
+    <div class="modal-overlay" id="customBlockModal">
+        <div class="modal-box" style="max-width: 480px; width: 95%;">
+            <h4>Desain Kursi Custom</h4>
+            <p style="font-size: 0.8rem; color: #666; margin-bottom: 10px;">
+                Klik kotak untuk mengubah status:<br>
+                <span style="display:inline-block; width:12px; height:12px; background:#4CAF50; border-radius:2px; vertical-align:middle;"></span> <strong>Hijau</strong> = Ada Kursi &nbsp;|&nbsp; 
+                <span style="display:inline-block; width:12px; height:12px; background:#ffffff; border:1px solid #ccc; border-radius:2px; vertical-align:middle;"></span> <strong>Putih</strong> = Tidak Ada Kursi
+            </p>
+            
+            <div id="customGridContainer" style="display: grid; gap: 6px; margin: 15px 0; max-height: 50vh; overflow-y: auto; padding: 5px; border: 1px solid #eee; border-radius: 6px;"></div>
+            
+            <div style="font-weight: bold; margin-bottom: 15px; font-size: 0.9rem;">
+                Jumlah Kursi: <span id="customTotalSeatCount" style="color: #2e7d32;">0</span>
+            </div>
+
+            <div class="modal-actions">
+                <button class="btn-modal-cancel" onclick="tutupModalCustom()">Batal</button>
+                <button class="btn-modal-confirm" style="background-color: #10b981;" onclick="simpanBlokCustom()">Simpan Blok</button>
+            </div>
         </div>
     </div>
 
@@ -318,7 +364,10 @@
         let selectedBlockCode = null;
         let blockToLockCode = null;
         let blockYangAkanDihapus = null;
-        let isSelectBlockLocked = false; // Tracking status kunci dropdown
+        let isSelectBlockLocked = false; 
+
+        // DATA SEMENTARA UNTUK BLOK CUSTOM
+        let customBlockData = { code: '', rows: 0, cols: 0, seats: [] };
 
         // PIN AKSES
         const SANDI_TAMBAH_HAPUS = "1234";
@@ -399,7 +448,7 @@
         function onSelectBlockChange(val) {
             selectedBlockCode = val ? val : null;
             if (selectedBlockCode) {
-                isSelectBlockLocked = true; // Kunci dropdown saat blok dipilih
+                isSelectBlockLocked = true;
             }
             updateDropdownState();
             renderIsiHadirin();
@@ -485,7 +534,8 @@
                 ? (Array.isArray(block.seats) ? block.seats : Object.values(block.seats))
                 : [];
 
-            const terisiCount = seats.filter(s => s && s.occupied).length;
+            const validSeats = seats.filter(s => s && s.isSeat !== false);
+            const terisiCount = validSeats.filter(s => s.occupied).length;
 
             const card = document.createElement('div');
             card.className = 'block-card';
@@ -493,7 +543,7 @@
             const header = document.createElement('div');
             header.className = 'block-header';
             header.innerHTML = `
-                <h3>Blok ${block.code} (${block.rows}x${block.cols}) - Terisi: ${terisiCount}</h3>
+                <h3>Blok ${block.code} (${block.rows}x${block.cols}) - Total Kursi: ${validSeats.length} | Terisi: ${terisiCount}</h3>
                 <div class="btn-group">
                     <button class="btn-action btn-full" ${isLocked ? 'disabled' : ''} onclick="mintaSandi('PENUH_KOSONG', () => setBlockFull('${block.code}'))">Penuh</button>
                     <button class="btn-action btn-empty" ${isLocked ? 'disabled' : ''} onclick="mintaSandi('PENUH_KOSONG', () => setBlockEmpty('${block.code}'))">Kosong</button>
@@ -511,6 +561,15 @@
 
             seats.forEach((seat, idx) => {
                 if (!seat) return;
+
+                if (seat.isSeat === false) {
+                    const emptyDiv = document.createElement('div');
+                    emptyDiv.style.height = '38px';
+                    emptyDiv.style.visibility = 'hidden';
+                    grid.appendChild(emptyDiv);
+                    return;
+                }
+
                 const btn = document.createElement('button');
                 btn.innerText = `${seat.r},${seat.c}`;
 
@@ -551,8 +610,9 @@
                     ? (Array.isArray(block.seats) ? block.seats : Object.values(block.seats))
                     : [];
 
-                const total = seats.length;
-                const terisi = seats.filter(s => s && s.occupied).length;
+                const validSeats = seats.filter(s => s && s.isSeat !== false);
+                const total = validSeats.length;
+                const terisi = validSeats.filter(s => s.occupied).length;
                 const kosong = total - terisi;
 
                 grandTotal += total;
@@ -599,7 +659,7 @@
             const seats = [];
             for (let r = 1; r <= rows; r++) {
                 for (let c = 1; c <= cols; c++) {
-                    seats.push({ r, c, occupied: false });
+                    seats.push({ r, c, occupied: false, isSeat: true });
                 }
             }
 
@@ -608,7 +668,103 @@
             
             codeInput.value = '';
             selectedBlockCode = code;
-            isSelectBlockLocked = true; // Kunci dropdown untuk blok baru
+            isSelectBlockLocked = true;
+            syncToFirebase();
+            switchTab('isi');
+        }
+
+        /* FITUR BLOK CUSTOM */
+        function bukaModalCustom() {
+            const codeInput = document.getElementById('blockCode');
+            const rowsInput = document.getElementById('blockRows');
+            const colsInput = document.getElementById('blockCols');
+
+            const code = codeInput.value.trim().toUpperCase();
+            const rows = parseInt(rowsInput.value);
+            const cols = parseInt(colsInput.value);
+
+            if (!code) return alert('Isi Kode Blok!');
+            
+            const blocks = getBlocksArray();
+            if (blocks.some(b => b && b.code === code)) return alert('Kode Blok sudah ada!');
+            if (isNaN(rows) || isNaN(cols) || rows < 1 || cols < 1) return alert('Jumlah baris dan kolom minimal 1!');
+
+            customBlockData = {
+                code: code,
+                rows: rows,
+                cols: cols,
+                seats: []
+            };
+
+            for (let r = 1; r <= rows; r++) {
+                for (let c = 1; c <= cols; c++) {
+                    customBlockData.seats.push({
+                        r: r,
+                        c: c,
+                        occupied: false,
+                        isSeat: true
+                    });
+                }
+            }
+
+            renderCustomGrid();
+            document.getElementById('customBlockModal').classList.add('active');
+        }
+
+        function renderCustomGrid() {
+            const container = document.getElementById('customGridContainer');
+            container.innerHTML = '';
+            container.style.gridTemplateColumns = `repeat(${customBlockData.cols}, 1fr)`;
+
+            let validCount = 0;
+
+            customBlockData.seats.forEach((seat, idx) => {
+                if (seat.isSeat) validCount++;
+
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `custom-seat-btn ${seat.isSeat ? 'custom-seat-active' : 'custom-seat-inactive'}`;
+                btn.innerText = seat.isSeat ? `${seat.r},${seat.c}` : '-';
+                btn.onclick = () => toggleCustomSeat(idx);
+                container.appendChild(btn);
+            });
+
+            document.getElementById('customTotalSeatCount').innerText = validCount;
+        }
+
+        function toggleCustomSeat(index) {
+            if (customBlockData.seats[index]) {
+                customBlockData.seats[index].isSeat = !customBlockData.seats[index].isSeat;
+                renderCustomGrid();
+            }
+        }
+
+        function tutupModalCustom() {
+            document.getElementById('customBlockModal').classList.remove('active');
+        }
+
+        function simpanBlokCustom() {
+            const validSeats = customBlockData.seats.filter(s => s.isSeat);
+            if (validSeats.length === 0) {
+                return alert('Minimal harus ada 1 kursi!');
+            }
+
+            const blocks = getBlocksArray();
+            blocks.push({
+                code: customBlockData.code,
+                rows: customBlockData.rows,
+                cols: customBlockData.cols,
+                seats: customBlockData.seats,
+                isLocked: false
+            });
+
+            state.blocks = blocks;
+
+            document.getElementById('blockCode').value = '';
+            selectedBlockCode = customBlockData.code;
+            isSelectBlockLocked = true;
+            
+            tutupModalCustom();
             syncToFirebase();
             switchTab('isi');
         }
@@ -642,7 +798,9 @@
             const block = blocks.find(b => b && b.code === blockCode);
             if (block && !block.isLocked && block.seats) {
                 const seats = Array.isArray(block.seats) ? block.seats : Object.values(block.seats);
-                seats.forEach(s => { if (s) s.occupied = true; });
+                seats.forEach(s => { 
+                    if (s && s.isSeat !== false) s.occupied = true; 
+                });
                 block.seats = seats;
                 syncToFirebase();
             }
@@ -653,7 +811,9 @@
             const block = blocks.find(b => b && b.code === blockCode);
             if (block && !block.isLocked && block.seats) {
                 const seats = Array.isArray(block.seats) ? block.seats : Object.values(block.seats);
-                seats.forEach(s => { if (s) s.occupied = false; });
+                seats.forEach(s => { 
+                    if (s && s.isSeat !== false) s.occupied = false; 
+                });
                 block.seats = seats;
                 syncToFirebase();
             }
@@ -664,7 +824,7 @@
             const block = blocks.find(b => b && b.code === blockCode);
             if (block && !block.isLocked && block.seats) {
                 const seats = Array.isArray(block.seats) ? block.seats : Object.values(block.seats);
-                if (seats[seatIndex]) {
+                if (seats[seatIndex] && seats[seatIndex].isSeat !== false) {
                     seats[seatIndex].occupied = !seats[seatIndex].occupied;
                     block.seats = seats;
                     syncToFirebase();
