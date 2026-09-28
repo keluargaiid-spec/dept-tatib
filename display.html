@@ -123,8 +123,9 @@
                     ? (Array.isArray(block.seats) ? block.seats : Object.values(block.seats))
                     : [];
 
-                const totalKursi = seats.length;
-                const terisi = seats.filter(s => s && s.occupied).length;
+                const validSeats = seats.filter(s => s && s.isSeat !== false);
+                const totalKursi = validSeats.length;
+                const terisi = validSeats.filter(s => s.occupied).length;
                 const kosong = totalKursi - terisi;
 
                 grandTotalKursi += totalKursi;
@@ -167,6 +168,15 @@
 
                 seats.forEach(seat => {
                     if (!seat) return;
+
+                    if (seat.isSeat === false) {
+                        const emptyEl = document.createElement('div');
+                        emptyEl.style.height = '26px';
+                        emptyEl.style.visibility = 'hidden';
+                        grid.appendChild(emptyEl);
+                        return;
+                    }
+
                     const seatEl = document.createElement('div');
                     seatEl.className = `seat ${seat.occupied ? 'occupied' : 'vacant'}`;
                     seatEl.style.fontSize = fontSize;
