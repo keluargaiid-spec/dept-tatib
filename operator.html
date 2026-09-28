@@ -152,9 +152,12 @@
 
     <!-- TAB 1: ISI HADIRIN -->
     <div id="tab-isi" class="tab-content active">
-        <select id="blockSelect" class="select-block" onchange="onSelectBlockChange(this.value)">
-            <option value="">-- Pilih Blok Kursi --</option>
-        </select>
+        <div style="display: flex; gap: 8px; margin-bottom: 15px; align-items: center;">
+            <select id="blockSelect" class="select-block" style="margin-bottom: 0; flex: 1;" onchange="onSelectBlockChange(this.value)">
+                <option value="">-- Pilih Blok Kursi --</option>
+            </select>
+            <button id="btnUnlockSelect" class="btn-lock" style="display: none; height: 41px; padding: 0 12px; font-weight: bold; background: #ff9800; color: white; border: none;" onclick="bukaKunciDropdown()" title="Buka Kunci Dropdown">🔒 Buka</button>
+        </div>
         <div id="isiBlockWrapper"></div>
     </div>
 
@@ -315,6 +318,7 @@
         let selectedBlockCode = null;
         let blockToLockCode = null;
         let blockYangAkanDihapus = null;
+        let isSelectBlockLocked = false; // Tracking status kunci dropdown
 
         // PIN AKSES
         const SANDI_TAMBAH_HAPUS = "1234";
@@ -394,7 +398,33 @@
 
         function onSelectBlockChange(val) {
             selectedBlockCode = val ? val : null;
+            if (selectedBlockCode) {
+                isSelectBlockLocked = true; // Kunci dropdown saat blok dipilih
+            }
+            updateDropdownState();
             renderIsiHadirin();
+        }
+
+        function bukaKunciDropdown() {
+            mintaSandi('ISI_BLOK', () => {
+                isSelectBlockLocked = false;
+                updateDropdownState();
+            });
+        }
+
+        function updateDropdownState() {
+            const blockSelect = document.getElementById('blockSelect');
+            const btnUnlockSelect = document.getElementById('btnUnlockSelect');
+
+            if (!blockSelect) return;
+
+            if (isSelectBlockLocked) {
+                blockSelect.disabled = true;
+                if (btnUnlockSelect) btnUnlockSelect.style.display = 'inline-block';
+            } else {
+                blockSelect.disabled = false;
+                if (btnUnlockSelect) btnUnlockSelect.style.display = 'none';
+            }
         }
 
         function renderAll() {
@@ -412,6 +442,8 @@
 
             if (blocks.length === 0) {
                 selectedBlockCode = null;
+                isSelectBlockLocked = false;
+                updateDropdownState();
                 return;
             }
 
@@ -429,7 +461,10 @@
             } else {
                 selectedBlockCode = null;
                 blockSelect.value = "";
+                isSelectBlockLocked = false;
             }
+
+            updateDropdownState();
         }
 
         function renderIsiHadirin() {
@@ -524,7 +559,6 @@
                 grandKosong += kosong;
                 grandTerisi += terisi;
 
-                // Status Icon: terkunci = ✅, terbuka = ✏️
                 const statusIcon = block.isLocked ? '✅' : '✏️';
 
                 const tr = document.createElement('tr');
@@ -569,12 +603,12 @@
                 }
             }
 
-            // blok baru dibuat dengan status isLocked: false (icon ✏️ Edit)
             blocks.push({ code, rows, cols, seats, isLocked: false });
             state.blocks = blocks;
             
             codeInput.value = '';
             selectedBlockCode = code;
+            isSelectBlockLocked = true; // Kunci dropdown untuk blok baru
             syncToFirebase();
             switchTab('isi');
         }
@@ -596,6 +630,7 @@
                 state.blocks = blocks.filter(b => b && b.code !== blockYangAkanDihapus);
                 if (selectedBlockCode === blockYangAkanDihapus) {
                     selectedBlockCode = null;
+                    isSelectBlockLocked = false;
                 }
                 syncToFirebase();
                 batalHapus();
