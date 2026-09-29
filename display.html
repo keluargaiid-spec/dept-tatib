@@ -34,6 +34,7 @@
             justify-content: center;
             transition: all 0.3s ease;
             outline: none;
+            z-index: 10;
         }
         .btn-power svg { width: 22px; height: 22px; fill: currentColor; }
         
@@ -105,7 +106,7 @@
 
         /* Disable Container saat System Matikan */
         .system-disabled {
-            opacity: 0.4;
+            opacity: 0.35;
             pointer-events: none;
             filter: grayscale(80%);
         }
@@ -204,18 +205,18 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database().ref('seminar_seats');
 
-        // Sandi sesuai instruksi
-        const SANDI_TAMBAH_HAPUS = "1234"; // Ubah sesuai PIN Anda
+        // PIN Sesuai Instruksi
+        const SANDI_TAMBAH_HAPUS = "1234";
 
         let currentInputPin = "";
         let isSystemActive = true;
         let globalRawData = null;
 
-        // Mendengarkan perubahan Firebase
+        // Mendengarkan perubahan Firebase Realtime
         db.on('value', (snapshot) => {
             globalRawData = snapshot.val();
             
-            // Baca status sistem (default true jika belum ada)
+            // Baca status sistem
             isSystemActive = globalRawData && globalRawData.systemActive !== undefined ? globalRawData.systemActive : true;
             
             updatePowerButtonUI(isSystemActive);
@@ -231,9 +232,11 @@
 
             if (active) {
                 btn.className = "btn-power on";
+                btn.title = "Sistem Aktif (Klik untuk Mematikan)";
                 mainContent.classList.remove("system-disabled");
             } else {
                 btn.className = "btn-power off";
+                btn.title = "Sistem Non-Aktif (Klik untuk Mengaktifkan & Reset)";
                 mainContent.classList.add("system-disabled");
             }
         }
@@ -278,7 +281,7 @@
             const nextActiveState = !isSystemActive;
 
             if (!nextActiveState) {
-                // DIUBAH MENJADI OFF (MERAH) -> Hentikan Penghitungan / Lock
+                // DIUBAH MENJADI OFF (MERAH) -> Hentikan Penghitungan
                 db.update({ systemActive: false });
             } else {
                 // DIUBAH MENJADI ON (HIJAU) -> Reset semua data kursi & hadirin lain
@@ -301,9 +304,8 @@
                     });
                 }
 
-                // Kirim reset data ke Firebase
                 db.update(updates).then(() => {
-                    alert("Sistem Diaktifkan Kembali! Semua data kursi telah di-reset.");
+                    alert("Sistem Diaktifkan Kembali! Semua data kursi dan hadirin telah di-reset.");
                 });
             }
         }
