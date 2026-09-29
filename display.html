@@ -66,11 +66,13 @@
             <thead>
                 <tr>
                     <th>Blok</th>
+                    <th>Jumlah Kursi</th>
                     <th>Terisi</th>
+                    <th>Kursi Kosong</th>
                 </tr>
             </thead>
             <tbody id="tableBody">
-                <tr><td colspan="2">Menghubungkan ke server...</td></tr>
+                <tr><td colspan="4">Menghubungkan ke server...</td></tr>
             </tbody>
             <tfoot id="tableFoot"></tfoot>
         </table>
@@ -91,7 +93,7 @@
             renderDisplay(data);
         }, (error) => {
             console.error("Gagal mengambil data:", error);
-            document.getElementById('tableBody').innerHTML = `<tr><td colspan="2" style="color:red">Error: ${error.message}</td></tr>`;
+            document.getElementById('tableBody').innerHTML = `<tr><td colspan="4" style="color:red">Error: ${error.message}</td></tr>`;
         });
 
         function renderDisplay(rawData) {
@@ -106,7 +108,7 @@
             const otherAttendees = (rawData && rawData.otherAttendees !== undefined) ? parseInt(rawData.otherAttendees) : 0;
 
             if (!rawData || (!rawData.blocks && otherAttendees === 0)) {
-                tbody.innerHTML = '<tr><td colspan="2">Belum ada data ditambahkan dari Panel Tatib.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="4">Belum ada data ditambahkan dari Panel Tatib.</td></tr>';
                 return;
             }
 
@@ -114,7 +116,9 @@
                 ? (Array.isArray(rawData.blocks) ? rawData.blocks : Object.values(rawData.blocks))
                 : [];
 
+            let grandTotalKursi = 0;
             let grandTotalTerisi = 0;
+            let grandTotalKosong = 0;
 
             blocks.forEach(block => {
                 if (!block) return;
@@ -124,9 +128,13 @@
                     : [];
 
                 const validSeats = seats.filter(s => s && s.isSeat !== false);
+                const jumlahKursi = validSeats.length;
                 const terisi = validSeats.filter(s => s.occupied).length;
+                const kosong = jumlahKursi - terisi;
 
+                grandTotalKursi += jumlahKursi;
                 grandTotalTerisi += terisi;
+                grandTotalKosong += kosong;
 
                 // Status Icon (Terkunci = ✅, Terbuka = ✏️)
                 const statusIcon = block.isLocked ? '✅' : '✏️';
@@ -134,7 +142,9 @@
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td><b>Blok ${block.code}</b> ${statusIcon}</td>
+                    <td>${jumlahKursi}</td>
                     <td class="text-terisi">${terisi}</td>
+                    <td class="text-kosong">${kosong}</td>
                 `;
                 tbody.appendChild(tr);
 
@@ -186,7 +196,9 @@
             const trOther = document.createElement('tr');
             trOther.innerHTML = `
                 <td><b>Hadirin Lain</b></td>
+                <td>-</td>
                 <td class="text-terisi">${otherAttendees}</td>
+                <td>-</td>
             `;
             tbody.appendChild(trOther);
 
@@ -195,7 +207,9 @@
             tfoot.innerHTML = `
                 <tr>
                     <td>TOTAL HADIRIN</td>
+                    <td>${grandTotalKursi}</td>
                     <td class="text-terisi">${totalHadirin}</td>
+                    <td class="text-kosong">${grandTotalKosong}</td>
                 </tr>
             `;
         }
