@@ -11,40 +11,106 @@
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #121212; color: white; padding: 15px; margin: 0; }
         
+        /* Header & Power Button Layout */
         .header-container {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 12px;
+            gap: 15px;
             margin: 5px 0 15px 0;
         }
         h1 { margin: 0; font-size: 1.6rem; letter-spacing: 1px; color: #38bdf8; text-align: center; }
         
-        /* Power Button Style */
-        .power-btn {
-            background-color: #2e7d32; /* Hijau saat aktif */
-            color: white;
-            border: 2px solid #81c784;
-            width: 38px;
-            height: 38px;
+        /* Tombol Power Styling */
+        .btn-power {
+            background: transparent;
+            border: 2px solid;
             border-radius: 50%;
-            font-size: 1.2rem;
+            width: 42px;
+            height: 42px;
             cursor: pointer;
-            display: inline-flex;
+            display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 0 10px rgba(46, 125, 50, 0.6);
             transition: all 0.3s ease;
+            outline: none;
         }
-        .power-btn.stopped {
-            background-color: #c62828; /* Merah saat dihentikan */
-            border-color: #e57373;
-            box-shadow: 0 0 10px rgba(198, 40, 40, 0.6);
+        .btn-power svg { width: 22px; height: 22px; fill: currentColor; }
+        
+        /* Status Power ON (Hijau) */
+        .btn-power.on {
+            color: #22c55e;
+            border-color: #22c55e;
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.4);
         }
-        .power-btn:hover {
-            transform: scale(1.1);
+        .btn-power.on:hover { background: rgba(34, 197, 94, 0.15); }
+
+        /* Status Power OFF (Merah) */
+        .btn-power.off {
+            color: #ef4444;
+            border-color: #ef4444;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+        }
+        .btn-power.off:hover { background: rgba(239, 68, 68, 0.15); }
+
+        /* Overlay & Keypad PIN Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .pin-modal {
+            background: #1e1e1e;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #444;
+            width: 280px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+        .pin-modal h3 { margin: 0 0 10px 0; color: #ffca28; font-size: 1.1rem; }
+        .pin-display {
+            width: 100%;
+            height: 40px;
+            background: #121212;
+            border: 1px solid #444;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 1.4rem;
+            text-align: center;
+            letter-spacing: 5px;
+            margin-bottom: 15px;
+            line-height: 40px;
+        }
+        .keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .key-btn {
+            background: #2c2c2c;
+            color: white;
+            border: 1px solid #444;
+            padding: 12px;
+            font-size: 1.1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .key-btn:active { background: #444; }
+        .key-btn.clear { background: #991b1b; }
+        .key-btn.enter { background: #15803d; }
+        .pin-error { color: #ef4444; font-size: 0.8rem; margin-top: 8px; min-height: 18px; }
+
+        /* Disable Container saat System Matikan */
+        .system-disabled {
+            opacity: 0.4;
+            pointer-events: none;
+            filter: grayscale(80%);
         }
 
+        /* Styling Tabel & Blok */
         .table-container { width: 100%; max-width: 95%; margin: 0 auto 20px auto; }
         .summary-table { width: 100%; border-collapse: collapse; background: #1e1e1e; border-radius: 8px; overflow: hidden; }
         .summary-table th, .summary-table td { padding: 8px 12px; text-align: center; border-bottom: 1px solid #333; }
@@ -55,161 +121,78 @@
         .text-terisi { color: #e57373; font-weight: bold; }
 
         .block-container { 
-            display: flex; 
-            flex-wrap: wrap; 
-            gap: 15px; 
-            justify-content: center; 
-            align-items: flex-start;
-            width: 100%;
+            display: flex; flex-wrap: wrap; gap: 15px; 
+            justify-content: center; align-items: flex-start; width: 100%; 
         }
-
         .block-card { 
-            background: #1e1e1e; 
-            padding: 10px 12px; 
-            border-radius: 8px; 
-            border: 1px solid #333; 
-            flex: 1 1 auto;
-            max-width: 100%;
-            box-sizing: border-box;
+            background: #1e1e1e; padding: 10px 12px; border-radius: 8px; 
+            border: 1px solid #333; flex: 1 1 auto; max-width: 100%; box-sizing: border-box; 
         }
         .block-card h3 { margin: 0 0 8px 0; border-bottom: 1px solid #444; padding-bottom: 5px; text-align: center; color: #ffca28; font-size: 1rem; }
         
         .grid { display: grid; gap: 4px; margin-top: 5px; width: 100%; }
         .seat { 
-            height: 26px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            border-radius: 3px; 
-            font-weight: bold; 
-            padding: 0 1px; 
-            white-space: nowrap;
-            overflow: hidden;
+            height: 26px; display: flex; align-items: center; justify-content: center; 
+            border-radius: 3px; font-weight: bold; padding: 0 1px; white-space: nowrap; overflow: hidden; 
         }
         .vacant { background-color: #2e7d32; color: white; }
         .occupied { background-color: #c62828; color: white; }
-
-        /* KEYPAD PIN MODAL STYLES */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        }
-        .modal-overlay.active { display: flex; }
-        .pin-modal {
-            background: #1e1e1e;
-            border: 1px solid #444;
-            border-radius: 12px;
-            padding: 20px;
-            width: 290px;
-            text-align: center;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.8);
-        }
-        .pin-modal h3 { margin: 0 0 10px 0; color: #ffca28; font-size: 1.1rem; }
-        .pin-display {
-            background: #121212;
-            border: 1px solid #444;
-            border-radius: 6px;
-            height: 45px;
-            font-size: 1.6rem;
-            letter-spacing: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-bottom: 15px;
-            color: #38bdf8;
-            font-weight: bold;
-        }
-        .keypad-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-        }
-        .keypad-btn {
-            background: #2c2c2c;
-            color: white;
-            border: 1px solid #444;
-            border-radius: 8px;
-            padding: 12px;
-            font-size: 1.2rem;
-            font-weight: bold;
-            cursor: pointer;
-            user-select: none;
-        }
-        .keypad-btn:active { background: #444; }
-        .keypad-btn.action-btn { background: #0284c7; color: white; }
-        .keypad-btn.clear-btn { background: #b91c1c; color: white; }
-        .modal-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        .modal-actions button {
-            flex: 1;
-            padding: 10px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 0.95rem;
-        }
-        .btn-cancel { background: #4b5563; color: white; }
-        .btn-submit { background: #16a34a; color: white; }
     </style>
 </head>
 <body>
 
     <div class="header-container">
         <h1>MONITORING KURSI PERTEMUAN</h1>
-        <button id="powerBtn" class="power-btn" title="Monitoring Aktif (Klik untuk Hentikan)" onclick="openPinModal()">⏻</button>
+        <!-- Tombol Power Icon -->
+        <button id="btnPower" class="btn-power on" title="Power System" onclick="promptPowerPIN()">
+            <svg viewBox="0 0 24 24">
+                <path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C17.99 7.86 19 9.81 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z"/>
+            </svg>
+        </button>
     </div>
 
-    <div class="table-container">
-        <table class="summary-table">
-            <thead>
-                <tr>
-                    <th>Blok</th>
-                    <th>Jumlah Kursi</th>
-                    <th>Terisi</th>
-                    <th>Kursi Kosong</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody">
-                <tr><td colspan="4">Menghubungkan ke server...</td></tr>
-            </tbody>
-            <tfoot id="tableFoot"></tfoot>
-        </table>
+    <div id="mainContent">
+        <div class="table-container">
+            <table class="summary-table">
+                <thead>
+                    <tr>
+                        <th>Blok</th>
+                        <th>Jumlah Kursi</th>
+                        <th>Terisi</th>
+                        <th>Kursi Kosong</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr><td colspan="4">Menghubungkan ke server...</td></tr>
+                </tbody>
+                <tfoot id="tableFoot"></tfoot>
+            </table>
+        </div>
+
+        <div class="block-container" id="blocksWrapper"></div>
     </div>
 
-    <div class="block-container" id="blocksWrapper"></div>
-
-    <!-- KEYPAD PIN MODAL -->
+    <!-- Modal Keypad PIN -->
     <div class="modal-overlay" id="pinModal">
         <div class="pin-modal">
-            <h3 id="pinModalTitle">MASUKKAN PIN</h3>
+            <h3>MASUKKAN PIN</h3>
             <div class="pin-display" id="pinDisplay"></div>
-            <div class="keypad-grid">
-                <button class="keypad-btn" onclick="pressKey('1')">1</button>
-                <button class="keypad-btn" onclick="pressKey('2')">2</button>
-                <button class="keypad-btn" onclick="pressKey('3')">3</button>
-                <button class="keypad-btn" onclick="pressKey('4')">4</button>
-                <button class="keypad-btn" onclick="pressKey('5')">5</button>
-                <button class="keypad-btn" onclick="pressKey('6')">6</button>
-                <button class="keypad-btn" onclick="pressKey('7')">7</button>
-                <button class="keypad-btn" onclick="pressKey('8')">8</button>
-                <button class="keypad-btn" onclick="pressKey('9')">9</button>
-                <button class="keypad-btn clear-btn" onclick="pressKey('C')">C</button>
-                <button class="keypad-btn" onclick="pressKey('0')">0</button>
-                <button class="keypad-btn action-btn" onclick="pressKey('DEL')">⌫</button>
+            <div class="keypad">
+                <button class="key-btn" onclick="pressPin('1')">1</button>
+                <button class="key-btn" onclick="pressPin('2')">2</button>
+                <button class="key-btn" onclick="pressPin('3')">3</button>
+                <button class="key-btn" onclick="pressPin('4')">4</button>
+                <button class="key-btn" onclick="pressPin('5')">5</button>
+                <button class="key-btn" onclick="pressPin('6')">6</button>
+                <button class="key-btn" onclick="pressPin('7')">7</button>
+                <button class="key-btn" onclick="pressPin('8')">8</button>
+                <button class="key-btn" onclick="pressPin('9')">9</button>
+                <button class="key-btn clear" onclick="clearPin()">C</button>
+                <button class="key-btn" onclick="pressPin('0')">0</button>
+                <button class="key-btn enter" onclick="submitPin()">OK</button>
             </div>
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="closePinModal()">Batal</button>
-                <button class="btn-submit" onclick="submitPin()">OK</button>
-            </div>
+            <div class="pin-error" id="pinError"></div>
+            <button style="margin-top: 10px; background: transparent; border: none; color: #888; cursor: pointer;" onclick="closePinModal()">Batal</button>
         </div>
     </div>
 
@@ -221,29 +204,109 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database().ref('seminar_seats');
 
-        let isMonitoringActive = true;
-        let pinBuffer = "";
+        // Sandi sesuai instruksi
+        const SANDI_TAMBAH_HAPUS = "1234"; // Ubah sesuai PIN Anda
 
-        // Mulai mendengarkan data realtime
-        function startMonitoring() {
-            db.on('value', handleSnapshot, (error) => {
-                console.error("Gagal mengambil data:", error);
-                document.getElementById('tableBody').innerHTML = `<tr><td colspan="4" style="color:red">Error: ${error.message}</td></tr>`;
-            });
+        let currentInputPin = "";
+        let isSystemActive = true;
+        let globalRawData = null;
+
+        // Mendengarkan perubahan Firebase
+        db.on('value', (snapshot) => {
+            globalRawData = snapshot.val();
+            
+            // Baca status sistem (default true jika belum ada)
+            isSystemActive = globalRawData && globalRawData.systemActive !== undefined ? globalRawData.systemActive : true;
+            
+            updatePowerButtonUI(isSystemActive);
+            renderDisplay(globalRawData);
+        }, (error) => {
+            console.error("Gagal mengambil data:", error);
+            document.getElementById('tableBody').innerHTML = `<tr><td colspan="4" style="color:red">Error: ${error.message}</td></tr>`;
+        });
+
+        function updatePowerButtonUI(active) {
+            const btn = document.getElementById('btnPower');
+            const mainContent = document.getElementById('mainContent');
+
+            if (active) {
+                btn.className = "btn-power on";
+                mainContent.classList.remove("system-disabled");
+            } else {
+                btn.className = "btn-power off";
+                mainContent.classList.add("system-disabled");
+            }
         }
 
-        // Hentikan penanganan snapshot realtime
-        function stopMonitoring() {
-            db.off('value', handleSnapshot);
+        /* --- KONTROL PIN KEYPAD --- */
+        function promptPowerPIN() {
+            currentInputPin = "";
+            document.getElementById('pinDisplay').innerText = "";
+            document.getElementById('pinError').innerText = "";
+            document.getElementById('pinModal').classList.add('active');
         }
 
-        function handleSnapshot(snapshot) {
-            const data = snapshot.val();
-            renderDisplay(data);
+        function closePinModal() {
+            document.getElementById('pinModal').classList.remove('active');
         }
 
-        // Inisialisasi awal
-        startMonitoring();
+        function pressPin(num) {
+            if (currentInputPin.length < 6) {
+                currentInputPin += num;
+                document.getElementById('pinDisplay').innerText = "*".repeat(currentInputPin.length);
+            }
+        }
+
+        function clearPin() {
+            currentInputPin = "";
+            document.getElementById('pinDisplay').innerText = "";
+            document.getElementById('pinError').innerText = "";
+        }
+
+        function submitPin() {
+            if (currentInputPin === SANDI_TAMBAH_HAPUS) {
+                closePinModal();
+                togglePowerState();
+            } else {
+                document.getElementById('pinError').innerText = "PIN Salah!";
+                clearPin();
+            }
+        }
+
+        /* --- TOGGLE POWER SYSTEM & RESET DATA --- */
+        function togglePowerState() {
+            const nextActiveState = !isSystemActive;
+
+            if (!nextActiveState) {
+                // DIUBAH MENJADI OFF (MERAH) -> Hentikan Penghitungan / Lock
+                db.update({ systemActive: false });
+            } else {
+                // DIUBAH MENJADI ON (HIJAU) -> Reset semua data kursi & hadirin lain
+                let updates = {};
+                updates['systemActive'] = true;
+                updates['otherAttendees'] = 0;
+
+                if (globalRawData && globalRawData.blocks) {
+                    const blocks = Array.isArray(globalRawData.blocks) ? globalRawData.blocks : Object.values(globalRawData.blocks);
+                    
+                    blocks.forEach((block, bIdx) => {
+                        if (block && block.seats) {
+                            const seats = Array.isArray(block.seats) ? block.seats : Object.values(block.seats);
+                            seats.forEach((seat, sIdx) => {
+                                if (seat && seat.isSeat !== false) {
+                                    updates[`blocks/${bIdx}/seats/${sIdx}/occupied`] = false;
+                                }
+                            });
+                        }
+                    });
+                }
+
+                // Kirim reset data ke Firebase
+                db.update(updates).then(() => {
+                    alert("Sistem Diaktifkan Kembali! Semua data kursi telah di-reset.");
+                });
+            }
+        }
 
         function renderDisplay(rawData) {
             const tbody = document.getElementById('tableBody');
@@ -310,8 +373,11 @@
                 grid.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
 
                 let fontSize = '0.7rem';
-                if (cols >= 10) fontSize = '0.55rem';
-                else if (cols >= 7) fontSize = '0.62rem';
+                if (cols >= 10) {
+                    fontSize = '0.55rem';
+                } else if (cols >= 7) {
+                    fontSize = '0.62rem';
+                }
 
                 seats.forEach(seat => {
                     if (!seat) return;
@@ -355,143 +421,6 @@
                 </tr>
             `;
         }
-
-        /* --- FUNGSI KEYPAD PIN & POWER BUTTON --- */
-        function openPinModal() {
-            pinBuffer = "";
-            updatePinDisplay();
-            document.getElementById('pinModalTitle').innerText = isMonitoringActive 
-                ? "PIN HENTIKAN MONITORING" 
-                : "PIN RESET & AKTIFKAN";
-            document.getElementById('pinModal').classList.add('active');
-        }
-
-        function closePinModal() {
-            pinBuffer = "";
-            document.getElementById('pinModal').classList.remove('active');
-        }
-
-        function pressKey(key) {
-            if (key === 'C') {
-                pinBuffer = "";
-            } else if (key === 'DEL') {
-                pinBuffer = pinBuffer.slice(0, -1);
-            } else if (pinBuffer.length < 8) {
-                pinBuffer += key;
-            }
-            updatePinDisplay();
-        }
-
-        function updatePinDisplay() {
-            document.getElementById('pinDisplay').innerText = '•'.repeat(pinBuffer.length);
-        }
-
-        // Verifikasi PIN dari Node Firebase `SANDI_TAMBAH_HAPUS`
-        async function verifyPin(enteredPin) {
-            try {
-                // Cek node root / SANDI_TAMBAH_HAPUS atau seminar_seats/SANDI_TAMBAH_HAPUS
-                let snap = await firebase.database().ref('SANDI_TAMBAH_HAPUS').once('value');
-                let validPin = snap.val();
-                
-                if (!validPin) {
-                    snap = await firebase.database().ref('seminar_seats/SANDI_TAMBAH_HAPUS').once('value');
-                    validPin = snap.val();
-                }
-
-                // Default PIN cadangan jika belum disetting di database
-                if (!validPin) validPin = "1234";
-
-                return String(enteredPin) === String(validPin);
-            } catch (err) {
-                console.error("Gagal memverifikasi PIN:", err);
-                return false;
-            }
-        }
-
-        async function submitPin() {
-            if (!pinBuffer) {
-                alert("Masukkan PIN terlebih dahulu!");
-                return;
-            }
-
-            const isValid = await verifyPin(pinBuffer);
-            if (isValid) {
-                closePinModal();
-                togglePowerState();
-            } else {
-                alert("PIN Salah! Akses ditolak.");
-                pinBuffer = "";
-                updatePinDisplay();
-            }
-        }
-
-        // Toggle Status Monitoring
-        async function togglePowerState() {
-            const powerBtn = document.getElementById('powerBtn');
-
-            if (isMonitoringActive) {
-                // HENTIKAN MONITORING (Ubah ke Merah)
-                isMonitoringActive = false;
-                powerBtn.classList.add('stopped');
-                powerBtn.title = "Monitoring Dihentikan (Klik untuk Reset & Aktifkan)";
-                stopMonitoring();
-                alert("Penghitungan/monitoring hadirin berhasil dihentikan.");
-            } else {
-                // RESET DATA & AKTIFKAN MONITORING (Ubah ke Hijau)
-                await resetAllSeatsData();
-                isMonitoringActive = true;
-                powerBtn.classList.remove('stopped');
-                powerBtn.title = "Monitoring Aktif (Klik untuk Hentikan)";
-                startMonitoring();
-                alert("Semua data kursi dan hadirin berhasil di-reset. Kembali ke mode pengisian.");
-            }
-        }
-
-        // Reset Data Kursi dan Hadirin Lain di Firebase
-        async function resetAllSeatsData() {
-            try {
-                const snap = await db.once('value');
-                const data = snap.val();
-                if (!data) return;
-
-                let updates = {};
-                updates['otherAttendees'] = 0;
-
-                if (data.blocks) {
-                    const blocks = Array.isArray(data.blocks) ? data.blocks : Object.values(data.blocks);
-                    blocks.forEach((block, bIdx) => {
-                        if (!block || !block.seats) return;
-                        const seats = Array.isArray(block.seats) ? block.seats : Object.values(block.seats);
-                        seats.forEach((seat, sIdx) => {
-                            if (seat && seat.isSeat !== false) {
-                                updates[`blocks/${bIdx}/seats/${sIdx}/occupied`] = false;
-                            }
-                        });
-                    });
-                }
-
-                await db.update(updates);
-            } catch (err) {
-                console.error("Gagal melakukan reset data:", err);
-                alert("Terjadi kesalahan saat mengosongkan data kursi.");
-            }
-        }
-
-        // Dukungan Tombol Keyboard Fisik untuk Keypad Modal
-        document.addEventListener('keydown', (e) => {
-            const modal = document.getElementById('pinModal');
-            if (!modal.classList.contains('active')) return;
-
-            if (e.key >= '0' && e.key <= '9') {
-                pressKey(e.key);
-            } else if (e.key === 'Backspace') {
-                pressKey('DEL');
-            } else if (e.key === 'Escape') {
-                closePinModal();
-            } else if (e.key === 'Enter') {
-                submitPin();
-            }
-        });
     </script>
 </body>
 </html>
