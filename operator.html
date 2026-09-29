@@ -20,8 +20,40 @@
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; padding: 15px; background: #f4f4f9; color: #333; margin: 0; }
         
         /* HEADER & SHORTCUT BUTTON */
-        .header-container { display: flex; flex-direction: column; align-items: center; gap: 8px; margin-bottom: 15px; }
-        .header-container h2 { margin: 0; font-size: 1.3rem; text-align: center; }
+        .header-container { display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 15px; }
+        .header-title-box { display: flex; align-items: center; justify-content: center; gap: 12px; }
+        .header-container h2 { margin: 0; font-size: 1.25rem; text-align: center; }
+        
+        /* Tombol Power Styling Operator */
+        .btn-power {
+            background: transparent;
+            border: 2px solid;
+            border-radius: 50%;
+            width: 38px;
+            height: 38px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            outline: none;
+            pointer-events: auto !important; /* Tombol Power selalu bisa diklik */
+            opacity: 1 !important;
+        }
+        .btn-power.on {
+            color: #22c55e;
+            border-color: #22c55e;
+            box-shadow: 0 0 8px rgba(34, 197, 94, 0.4);
+        }
+        .btn-power.on:hover { background: rgba(34, 197, 94, 0.15); }
+
+        .btn-power.off {
+            color: #ef4444;
+            border-color: #ef4444;
+            box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+        }
+        .btn-power.off:hover { background: rgba(239, 68, 68, 0.15); }
+
         .btn-shortcut {
             background-color: #0284c7;
             color: white;
@@ -41,7 +73,14 @@
         
         button, input, select { touch-action: manipulation; }
 
-        /* DISABLED STATE STYLING */
+        /* DISABLED STATE SAAT POWER OFF */
+        .system-disabled-panel {
+            opacity: 0.4 !important;
+            pointer-events: none !important;
+            user-select: none !important;
+            filter: grayscale(80%);
+        }
+
         button:disabled, select:disabled, input:disabled {
             opacity: 0.5 !important;
             cursor: not-allowed !important;
@@ -156,7 +195,7 @@
         .key-btn.btn-confirm-key { background: #4caf50; color: white; border: none; }
         .key-btn.btn-delete-key { background: #ff9800; color: white; border: none; }
 
-        /* TALLY COUNTER CLICKER STYLES (HADIRIN LAIN) */
+        /* TALLY COUNTER CLICKER STYLES */
         .counter-wrapper {
             display: flex;
             flex-direction: column;
@@ -191,9 +230,7 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.4);
             outline: none;
         }
-        .btn-counter-reset:active {
-            transform: scale(0.92);
-        }
+        .btn-counter-reset:active { transform: scale(0.92); }
         .counter-display-box {
             margin-top: 25px;
             background: #181818;
@@ -269,14 +306,22 @@
 <body>
 
     <div class="header-container">
-        <h2>PANEL TATIB - MONITORING KURSI</h2>
+        <div class="header-title-box">
+            <h2>PANEL TATIB - MONITORING KURSI</h2>
+            <!-- Tombol Power Icon -->
+            <button id="btnPower" class="btn-power on" title="Power System" onclick="promptPowerPIN()">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                    <path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C17.99 7.86 19 9.81 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z"/>
+                </svg>
+            </button>
+        </div>
         <button id="btnShortcut" class="btn-shortcut" onclick="tambahShortcut()">
             📱 Buat Shortcut di Utama
         </button>
     </div>
 
     <!-- TAB MENU -->
-    <div class="tab-menu">
+    <div class="tab-menu" id="tabMenu">
         <button class="tab-btn active" id="btn-tab-isi" onclick="switchTab('isi')">Isi Hadirin</button>
         <button class="tab-btn" id="btn-tab-hadirin-lain" onclick="switchTab('hadirin-lain')">Hadirin Lain</button>
         <button class="tab-btn" id="btn-tab-tambah-rekap" onclick="switchTab('tambah-rekap')">Tambah & Rekap</button>
@@ -303,20 +348,14 @@
 
             <div class="counter-wrapper">
                 <div class="tally-counter-card">
-                    <!-- Tombol Merah untuk Reset -->
                     <button class="btn-counter-reset" onclick="resetHadirinLain()" title="Reset Counter"></button>
                     
-                    <!-- Layar Tampilan Angka Digital -->
                     <div class="counter-display-box">
                         <div class="counter-display-text" id="otherAttendeesDisplay">0000</div>
                     </div>
                     
-                    <!-- Tombol Kontrol (+ dan -) -->
                     <div class="counter-controls">
-                        <!-- Tombol Tambah Hijau -->
                         <button class="btn-counter-plus" onclick="tambahHadirinLain()">+</button>
-                        
-                        <!-- Tombol Kurang Kuning -->
                         <button class="btn-counter-minus" onclick="kurangHadirinLain()">-</button>
                     </div>
                 </div>
@@ -500,6 +539,7 @@
         const db = firebase.database().ref('seminar_seats');
 
         let state = { blocks: [], otherAttendees: 0 };
+        let isSystemActive = true;
         let selectedBlockCode = null;
         let blockToLockCode = null;
         let blockYangAkanDihapus = null;
@@ -522,10 +562,13 @@
             if (data) {
                 state.blocks = data.blocks || [];
                 state.otherAttendees = data.otherAttendees !== undefined ? parseInt(data.otherAttendees) : 0;
+                isSystemActive = data.systemActive !== undefined ? data.systemActive : true;
             } else {
                 state = { blocks: [], otherAttendees: 0 };
+                isSystemActive = true;
             }
             normalizeBlocksState();
+            updatePowerButtonUI(isSystemActive);
             renderAll();
         }, (err) => {
             console.error("Firebase Error:", err);
@@ -539,8 +582,68 @@
             }
         }
 
+        function updatePowerButtonUI(active) {
+            const btn = document.getElementById('btnPower');
+            const tabMenu = document.getElementById('tabMenu');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            if (btn) {
+                if (active) {
+                    btn.className = "btn-power on";
+                    btn.title = "Sistem Aktif (Klik untuk Mematikan)";
+                    if (tabMenu) tabMenu.classList.remove("system-disabled-panel");
+                    tabContents.forEach(el => el.classList.remove("system-disabled-panel"));
+                } else {
+                    btn.className = "btn-power off";
+                    btn.title = "Sistem Non-Aktif (Klik untuk Mengaktifkan & Reset)";
+                    if (tabMenu) tabMenu.classList.add("system-disabled-panel");
+                    tabContents.forEach(el => el.classList.add("system-disabled-panel"));
+                }
+            }
+        }
+
+        function promptPowerPIN() {
+            mintaSandi('TAMBAH_HAPUS', togglePowerState);
+        }
+
+        function togglePowerState() {
+            const nextActiveState = !isSystemActive;
+
+            if (!nextActiveState) {
+                // DIUBAH MENJADI OFF -> Non-aktifkan semua kontrol
+                db.update({ systemActive: false }).then(() => {
+                    alert("Sistem Dihentikan! Semua tombol di Operator dan Layar Display Non-Aktif.");
+                });
+            } else {
+                // DIUBAH MENJADI ON -> Reset semua data
+                let updates = {};
+                updates['systemActive'] = true;
+                updates['otherAttendees'] = 0;
+
+                const blocks = getBlocksArray();
+                blocks.forEach((block, bIdx) => {
+                    if (block && block.seats) {
+                        const seats = Array.isArray(block.seats) ? block.seats : Object.values(block.seats);
+                        seats.forEach((seat, sIdx) => {
+                            if (seat && seat.isSeat !== false) {
+                                updates[`blocks/${bIdx}/seats/${sIdx}/occupied`] = false;
+                            }
+                        });
+                    }
+                });
+
+                db.update(updates).then(() => {
+                    alert("Sistem Diaktifkan Kembali! Semua data kursi terisi dan kosong telah di-reset.");
+                });
+            }
+        }
+
         function syncToFirebase() {
-            db.set(state);
+            db.set({
+                blocks: state.blocks,
+                otherAttendees: state.otherAttendees,
+                systemActive: isSystemActive
+            });
         }
 
         function getBlocksArray() {
@@ -756,7 +859,7 @@
         }
 
         function resetHadirinLain() {
-            mintaSandi('PENUH_KOSONG', () => {
+            mintaSandi('TAMBAH_HAPUS', () => {
                 state.otherAttendees = 0;
                 syncToFirebase();
             });
@@ -800,7 +903,6 @@
                 opTableBody.appendChild(tr);
             });
 
-            // Tambahkan baris Hadirin Lain
             const trOther = document.createElement('tr');
             trOther.innerHTML = `
                 <td><b>Hadirin Lain</b></td>
