@@ -10,8 +10,63 @@
     <style>
         * { box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #121212; color: white; padding: 15px; margin: 0; }
-        h1 { text-align: center; margin: 5px 0 15px 0; font-size: 1.6rem; letter-spacing: 1px; color: #38bdf8; }
         
+        /* Container Judul & Tombol Power */
+        .header-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin: 5px 0 15px 0;
+        }
+        h1 { margin: 0; font-size: 1.6rem; letter-spacing: 1px; color: #38bdf8; text-align: center; }
+        
+        /* Style Tombol Power Icon */
+        .btn-power {
+            background: #1e1e1e;
+            border: 2px solid;
+            border-radius: 50%;
+            width: 42px;
+            height: 42px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            outline: none;
+            padding: 0;
+        }
+        .btn-power.green {
+            color: #4caf50;
+            border-color: #4caf50;
+            box-shadow: 0 0 12px rgba(76, 175, 80, 0.5);
+        }
+        .btn-power.green:hover {
+            background-color: rgba(76, 175, 80, 0.2);
+        }
+        .btn-power.red {
+            color: #f44336;
+            border-color: #f44336;
+            box-shadow: 0 0 12px rgba(244, 67, 54, 0.5);
+        }
+        .btn-power.red:hover {
+            background-color: rgba(244, 67, 54, 0.2);
+        }
+        .btn-power svg {
+            width: 22px;
+            height: 22px;
+            fill: currentColor;
+        }
+
+        .status-badge {
+            text-align: center;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            font-weight: bold;
+        }
+        .status-badge.stopped { color: #f44336; }
+        .status-badge.active { color: #4caf50; }
+
         .table-container { width: 100%; max-width: 95%; margin: 0 auto 20px auto; }
         .summary-table { width: 100%; border-collapse: collapse; background: #1e1e1e; border-radius: 8px; overflow: hidden; }
         .summary-table th, .summary-table td { padding: 8px 12px; text-align: center; border-bottom: 1px solid #333; }
@@ -59,7 +114,16 @@
 </head>
 <body>
 
-    <h1>MONITORING KURSI PERTEMUAN</h1>
+    <div class="header-container">
+        <h1>MONITORING KURSI PERTEMUAN</h1>
+        <button id="btnPower" class="btn-power green" onclick="handlePowerClick()" title="Status Monitoring">
+            <svg viewBox="0 0 24 24">
+                <path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C17.99 7.86 19 9.81 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z"/>
+            </svg>
+        </button>
+    </div>
+
+    <div id="statusBadge" class="status-badge active">● MONITORING AKTIF</div>
 
     <div class="table-container">
         <table class="summary-table">
@@ -81,6 +145,9 @@
     <div class="block-container" id="blocksWrapper"></div>
 
     <script>
+        // Konfigurasi Sandi
+        const SANDI_TAMBAH_HAPUS = "1234"; // Ganti dengan sandi yang Anda inginkan
+
         const firebaseConfig = {
             databaseURL: "https://monitoring-tatib-default-rtdb.asia-southeast1.firebasedatabase.app"
         };
@@ -88,13 +155,91 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database().ref('seminar_seats');
 
+        let isMonitoringStopped = false;
+
         db.on('value', (snapshot) => {
             const data = snapshot.val();
+            
+            // Cek status penghentian dari Firebase
+            isMonitoringStopped = data && data.isStopped ? true : false;
+            updatePowerButtonUI(isMonitoringStopped);
+
             renderDisplay(data);
         }, (error) => {
             console.error("Gagal mengambil data:", error);
             document.getElementById('tableBody').innerHTML = `<tr><td colspan="4" style="color:red">Error: ${error.message}</td></tr>`;
         });
+
+        function updatePowerButtonUI(stopped) {
+            const btn = document.getElementById('btnPower');
+            const badge = document.getElementById('statusBadge');
+
+            if (stopped) {
+                btn.className = 'btn-power red';
+                btn.title = "Penghitungan Dihentikan (Klik untuk Reset & Aktifkan Kembali)";
+                badge.className = 'status-badge stopped';
+                badge.innerText = "● PENGHITUNGAN DIHENTIKAN";
+            } else {
+                btn.className = 'btn-power green';
+                btn.title = "Monitoring Aktif (Klik untuk Hentikan Penghitungan)";
+                badge.className = 'status-badge active';
+                badge.innerText = "● MONITORING AKTIF";
+            }
+        }
+
+        function handlePowerClick() {
+            const inputSandi = prompt("Masukkan Sandi TAMBAH/HAPUS:");
+            if (inputSandi === null) return; // Dibatalkan pengguna
+
+            if (inputSandi !== SANDI_TAMBAH_HAPUS) {
+                alert("Sandi salah! Akses ditolak.");
+                return;
+            }
+
+            if (!isMonitoringStopped) {
+                // KONDISI 1: Dari Hijau ke Merah (Hentikan Penghitungan)
+                db.child('isStopped').set(true)
+                    .then(() => {
+                        alert("Penghitungan hadirin berhasil DIHENTIKAN.");
+                    })
+                    .catch(err => alert("Gagal memperbarui status: " + err.message));
+            } else {
+                // KONDISI 2: Dari Merah ke Hijau (Reset Data & Aktifkan Kembali)
+                if (confirm("Apakah Anda yakin ingin MENGAKTIFKAN KEMBALI dan MERESET semua data kursi terisi/kosong?")) {
+                    resetAllSeatsData();
+                }
+            }
+        }
+
+        function resetAllSeatsData() {
+            db.once('value').then(snapshot => {
+                const data = snapshot.val();
+                if (!data) return;
+
+                let updates = {};
+                updates['isStopped'] = false;
+                updates['otherAttendees'] = 0;
+
+                // Reset status terisi seluruh kursi di semua blok
+                if (data.blocks) {
+                    const blocks = Array.isArray(data.blocks) ? data.blocks : Object.values(data.blocks);
+                    blocks.forEach((block, bIdx) => {
+                        if (block && block.seats) {
+                            const seats = Array.isArray(block.seats) ? block.seats : Object.values(block.seats);
+                            seats.forEach((seat, sIdx) => {
+                                if (seat) {
+                                    updates[`blocks/${bIdx}/seats/${sIdx}/occupied`] = false;
+                                }
+                            });
+                        }
+                    });
+                }
+
+                db.update(updates)
+                    .then(() => alert("Data berhasil di-reset ke mode pengisian awal!"))
+                    .catch(err => alert("Gagal melakukan reset data: " + err.message));
+            });
+        }
 
         function renderDisplay(rawData) {
             const tbody = document.getElementById('tableBody');
@@ -136,7 +281,6 @@
                 grandTotalTerisi += terisi;
                 grandTotalKosong += kosong;
 
-                // Status Icon (Terkunci = ✅, Terbuka = ✏️)
                 const statusIcon = block.isLocked ? '✅' : '✏️';
 
                 const tr = document.createElement('tr');
@@ -151,7 +295,6 @@
                 const card = document.createElement('div');
                 card.className = 'block-card';
 
-                // Hitung lebar minimum dinamis berdasarkan jumlah kolom
                 const cols = parseInt(block.cols) || 1;
                 const minWidth = Math.max(200, cols * 28 + 24); 
                 card.style.minWidth = `${minWidth}px`;
@@ -162,7 +305,6 @@
                 grid.className = 'grid';
                 grid.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
 
-                // Penyesuaian ukuran font otomatis jika kolom banyak
                 let fontSize = '0.7rem';
                 if (cols >= 10) {
                     fontSize = '0.55rem';
@@ -192,7 +334,6 @@
                 wrapper.appendChild(card);
             });
 
-            // Tambahkan baris Hadirin Lain di tabel
             const trOther = document.createElement('tr');
             trOther.innerHTML = `
                 <td><b>Hadirin Lain</b></td>
